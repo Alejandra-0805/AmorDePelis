@@ -1,4 +1,4 @@
-package com.example.compose
+package com.alejandra.amordepelis.core.ui.theme
 import androidx.compose.ui.graphics.Color
 
 val primaryLight = Color(0xFF65558F)
@@ -216,3 +216,16 @@ val surfaceContainerLowDarkHighContrast = Color(0xFF211F24)
 val surfaceContainerDarkHighContrast = Color(0xFF322F35)
 val surfaceContainerHighDarkHighContrast = Color(0xFF3D3A41)
 val surfaceContainerHighestDarkHighContrast = Color(0xFF48464C)
+
+// App custom gradient colors
+val GradientPurpleStart = Color(0xFFAB47BC)
+val GradientPurpleCenter = Color(0xFF9C27B0)
+val GradientBlueEnd = Color(0xFF7C4DFF)
+val GradientCyan = Color(0xFF00BCD4)
+
+// Couple Registration Screen colors
+val CoupleCardBackground = Color(0xFFFFFFFF)
+val CoupleIconBackground = Color(0xFFFFFFFF)
+val CoupleIconTint = Color(0xFF9C27B0)
+val CoupleButtonGradientStart = Color(0xFF9C27B0)
+val CoupleButtonGradientEnd = Color(0xFF7C4DFF)
