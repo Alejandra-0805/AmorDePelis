@@ -7,7 +7,7 @@ import com.alejandra.amordepelis.features.movies.domain.usecases.MoviesUseCases
 
 object MoviesUseCaseModule {
     fun provideMoviesUseCases(): MoviesUseCases {
-        val repository = MoviesRepositoryModule.provideMoviesRepository()
+        val repository = MoviesRepositoryModule().provideMoviesRepository()
         return MoviesUseCases(
             getMovies = GetMoviesUseCase(repository),
             getMovieDetails = GetMovieDetailsUseCase(repository),
