@@ -7,7 +7,7 @@ import com.alejandra.amordepelis.features.user.domain.usecases.UserUseCases
 
 object UserUseCaseModule {
     fun provideUserUseCases(): UserUseCases {
-        val repository = UserRepositoryModule.provideUserRepository()
+        val repository = UserRepositoryModule().provideUserRepository()
         return UserUseCases(
             getUserProfile = GetUserProfileUseCase(repository),
             searchUsersByUsername = SearchUsersByUsernameUseCase(repository),
