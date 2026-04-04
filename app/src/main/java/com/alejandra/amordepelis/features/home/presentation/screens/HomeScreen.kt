@@ -1,33 +1,46 @@
 package com.alejandra.amordepelis.features.home.presentation.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Group
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Movie
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.TrendingUp
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -38,320 +51,418 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.alejandra.amordepelis.core.ui.theme.AppTheme
-import com.alejandra.amordepelis.core.ui.theme.CoupleButtonGradientEnd
-import com.alejandra.amordepelis.core.ui.theme.CoupleButtonGradientStart
-import com.alejandra.amordepelis.core.ui.theme.CoupleIconTint
-import com.alejandra.amordepelis.core.ui.theme.GradientBlueEnd
-import com.alejandra.amordepelis.core.ui.theme.GradientCyan
-import com.alejandra.amordepelis.core.ui.theme.GradientPurpleStart
-import com.alejandra.amordepelis.features.auth.presentation.viewmodels.AuthViewModel
+import com.alejandra.amordepelis.features.home.presentation.viewmodels.HomeViewModel
+import kotlin.math.roundToInt
 
 @Composable
-fun LoginScreen(
-    viewModel: AuthViewModel = viewModel(),
+fun HomeScreen(
+    viewModel: HomeViewModel = viewModel(),
     modifier: Modifier = Modifier,
-    onLoginSuccess: () -> Unit = {}
+    onAddFirstMovieClick: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
 
-    LaunchedEffect(uiState.isSuccess) {
-        if (uiState.isSuccess) {
-            onLoginSuccess()
-            viewModel.clearState()
+    LaunchedEffect(uiState.message) {
+        uiState.message?.let {
+            snackbarHostState.showSnackbar(
+                message = it,
+                duration = SnackbarDuration.Short
+            )
+            viewModel.clearMessage()
         }
     }
 
-    LaunchedEffect(uiState.message) {
-        uiState.message?.let {
-            snackbarHostState.showSnackbar(it)
+    LaunchedEffect(uiState.error) {
+        uiState.error?.let {
+            snackbarHostState.showSnackbar(
+                message = it,
+                duration = SnackbarDuration.Short
+            )
+            viewModel.clearError()
         }
     }
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
-        snackbarHost = { SnackbarHost(snackbarHostState) }
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        bottomBar = {
+            HomeBottomBar(
+                selected = uiState.selectedBottomTab,
+                onTabSelected = viewModel::onBottomTabSelected
+            )
+        }
     ) { paddingValues ->
-        LoginScreenContent(
+        HomeScreenContent(
             uiState = uiState,
-            onFirstNameChange = viewModel::onFirstNameChange,
-            onSecondNameChange = viewModel::onSecondNameChange,
-            onStartClick = viewModel::registerCouple,
+            onAddFirstMovieClick = {
+                viewModel.onAddFirstMovieClick()
+                onAddFirstMovieClick()
+            },
             modifier = Modifier.padding(paddingValues)
         )
     }
 }
 
 @Composable
-private fun LoginScreenContent(
+private fun HomeScreenContent(
     uiState: HomeUiState,
-    onFirstNameChange: (String) -> Unit,
-    onSecondNameChange: (String) -> Unit,
-    onStartClick: () -> Unit,
+    onAddFirstMovieClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val backgroundGradient = Brush.verticalGradient(
+    val headerGradient = Brush.horizontalGradient(
         colors = listOf(
-            GradientPurpleStart,
-            GradientBlueEnd,
-            GradientCyan
+            MaterialTheme.colorScheme.primary,
+            MaterialTheme.colorScheme.tertiary
         )
     )
 
-    val buttonGradient = Brush.horizontalGradient(
-        colors = listOf(
-            CoupleButtonGradientStart,
-            CoupleButtonGradientEnd
-        )
-    )
-
-    val isButtonEnabled = uiState.firstName.isNotBlank() && 
-                          uiState.secondName.isNotBlank() && 
-                          !uiState.isLoading
-
-    Box(
+    LazyColumn(
         modifier = modifier
             .fillMaxSize()
-            .background(backgroundGradient)
+            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.25f)),
+        contentPadding = PaddingValues(bottom = 24.dp)
+    ) {
+        item {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(headerGradient)
+                    .padding(horizontal = 24.dp, vertical = 32.dp)
+            ) {
+                Column {
+                    Text(
+                        text = uiState.title,
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onPrimary
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "${uiState.firstPersonName} & ${uiState.secondPersonName}",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.82f)
+                    )
+                }
+            }
+        }
+
+        item {
+            Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 20.dp)) {
+                MetricsGrid(uiState = uiState)
+            }
+        }
+
+        item {
+            Column(modifier = Modifier.padding(horizontal = 20.dp)) {
+                Text(
+                    text = "Vistas recientemente",
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+        }
+
+        if (uiState.recentMovies.isEmpty() && uiState.isLoading) {
+            item {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(180.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+                }
+            }
+        } else {
+            items(uiState.recentMovies, key = { it.id }) { movie ->
+                MovieItemCard(
+                    movie = movie,
+                    modifier = Modifier
+                        .padding(horizontal = 20.dp)
+                        .padding(bottom = 12.dp)
+                )
+            }
+        }
+
+        item {
+            Spacer(modifier = Modifier.height(28.dp))
+            Button(
+                onClick = onAddFirstMovieClick,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp)
+                    .height(56.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
+                ),
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Text(
+                    text = uiState.addFirstMovieButtonLabel,
+                    style = MaterialTheme.typography.titleMedium
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun MetricsGrid(uiState: HomeUiState) {
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            MetricCard(
+                title = "Películas vistas",
+                value = uiState.moviesWatched.toString(),
+                icon = Icons.Default.Movie,
+                iconTint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.weight(1f)
+            )
+            MetricCard(
+                title = "Favoritas",
+                value = uiState.favorites.toString(),
+                icon = Icons.Default.Favorite,
+                iconTint = MaterialTheme.colorScheme.error,
+                modifier = Modifier.weight(1f)
+            )
+        }
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            MetricCard(
+                title = "Calificación",
+                value = String.format("%.1f", uiState.averageRating),
+                icon = Icons.Default.TrendingUp,
+                iconTint = MaterialTheme.colorScheme.tertiary,
+                trailing = {
+                    Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+                        val filledStars = uiState.averageRating.roundToInt().coerceIn(0, 5)
+                        repeat(5) { index ->
+                            Icon(
+                                imageVector = Icons.Default.Star,
+                                contentDescription = null,
+                                tint = if (index < filledStars) {
+                                    MaterialTheme.colorScheme.secondary
+                                } else {
+                                    MaterialTheme.colorScheme.outline
+                                },
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
+                    }
+                },
+                modifier = Modifier.weight(1f)
+            )
+            MetricCard(
+                title = "Listas",
+                value = uiState.lists.toString(),
+                icon = Icons.Default.List,
+                iconTint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.weight(1f)
+            )
+        }
+    }
+}
+
+@Composable
+private fun MetricCard(
+    title: String,
+    value: String,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    iconTint: androidx.compose.ui.graphics.Color,
+    modifier: Modifier = Modifier,
+    trailing: @Composable (() -> Unit)? = null
+) {
+    Card(
+        modifier = modifier,
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(
             modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .fillMaxWidth()
+                .padding(16.dp)
         ) {
-            Spacer(modifier = Modifier.height(60.dp))
-
-            Box(
-                modifier = Modifier
-                    .size(100.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.surface),
-                contentAlignment = Alignment.Center
-            ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
-                    imageVector = Icons.Default.Movie,
-                    contentDescription = "Movie Icon",
-                    modifier = Modifier.size(48.dp),
-                    tint = CoupleIconTint
+                    imageVector = icon,
+                    contentDescription = title,
+                    tint = iconTint,
+                    modifier = Modifier.size(22.dp)
+                )
+                Spacer(modifier = Modifier.size(8.dp))
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            Text(
-                text = "Nuestra Cartelera",
-                style = MaterialTheme.typography.headlineLarge.copy(
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 32.sp
-                ),
-                color = MaterialTheme.colorScheme.surface,
-                textAlign = TextAlign.Center
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text(
-                text = "Registren las películas que ven juntos",
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f),
-                textAlign = TextAlign.Center
-            )
-
-            Spacer(modifier = Modifier.height(40.dp))
-
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(24.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                ),
-                elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(24.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Group,
-                            contentDescription = "Group Icon",
-                            modifier = Modifier.size(28.dp),
-                            tint = CoupleIconTint
-                        )
-                        Spacer(modifier = Modifier.size(8.dp))
-                        Text(
-                            text = "Bienvenidos",
-                            style = MaterialTheme.typography.headlineSmall.copy(
-                                fontWeight = FontWeight.Bold
-                            ),
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(24.dp))
-
-                    Text(
-                        text = "Nombre de la primera persona",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    OutlinedTextField(
-                        value = uiState.firstName,
-                        onValueChange = onFirstNameChange,
-                        placeholder = {
-                            Text(
-                                text = "Ej: María",
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true,
-                        enabled = !uiState.isLoading,
-                        shape = RoundedCornerShape(12.dp),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = MaterialTheme.colorScheme.primary,
-                            unfocusedBorderColor = MaterialTheme.colorScheme.outline,
-                            focusedContainerColor = MaterialTheme.colorScheme.surface,
-                            unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-                            cursorColor = MaterialTheme.colorScheme.primary
-                        )
-                    )
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    Text(
-                        text = "Nombre de la segunda persona",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    OutlinedTextField(
-                        value = uiState.secondName,
-                        onValueChange = onSecondNameChange,
-                        placeholder = {
-                            Text(
-                                text = "Ej: Carlos",
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true,
-                        enabled = !uiState.isLoading,
-                        shape = RoundedCornerShape(12.dp),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = MaterialTheme.colorScheme.primary,
-                            unfocusedBorderColor = MaterialTheme.colorScheme.outline,
-                            focusedContainerColor = MaterialTheme.colorScheme.surface,
-                            unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-                            cursorColor = MaterialTheme.colorScheme.primary
-                        )
-                    )
-
-                    uiState.error?.let { error ->
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = error,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.error,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(24.dp))
-
-                    Button(
-                        onClick = onStartClick,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(56.dp),
-                        enabled = isButtonEnabled,
-                        shape = RoundedCornerShape(28.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.primary,
-                            disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant
-                        )
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(
-                                    brush = if (isButtonEnabled)
-                                        buttonGradient
-                                    else
-                                        Brush.horizontalGradient(
-                                            colors = listOf(
-                                                MaterialTheme.colorScheme.surfaceVariant,
-                                                MaterialTheme.colorScheme.surfaceVariant
-                                            )
-                                        ),
-                                    shape = RoundedCornerShape(28.dp)
-                                ),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            if (uiState.isLoading) {
-                                CircularProgressIndicator(
-                                    modifier = Modifier.size(24.dp),
-                                    color = MaterialTheme.colorScheme.onPrimary,
-                                    strokeWidth = 2.dp
-                                )
-                            } else {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.Center
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.Favorite,
-                                        contentDescription = "Heart",
-                                        tint = MaterialTheme.colorScheme.onPrimary,
-                                        modifier = Modifier.size(20.dp)
-                                    )
-                                    Spacer(modifier = Modifier.size(8.dp))
-                                    Text(
-                                        text = "Comenzar",
-                                        style = MaterialTheme.typography.labelLarge,
-                                        color = MaterialTheme.colorScheme.onPrimary
-                                    )
-                                }
-                            }
-                        }
-                    }
+            Spacer(modifier = Modifier.height(12.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = value,
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontWeight = FontWeight.Medium
+                )
+                if (trailing != null) {
+                    Spacer(modifier = Modifier.width(8.dp))
+                    trailing()
                 }
             }
+        }
+    }
+}
 
-            Spacer(modifier = Modifier.height(40.dp))
+@Composable
+private fun MovieItemCard(
+    movie: RecentMovieUiModel,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(14.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+    ) {
+        Row(modifier = Modifier.fillMaxWidth()) {
+            Box(
+                modifier = Modifier
+                    .width(6.dp)
+                    .fillMaxHeight()
+                    .background(
+                        Brush.verticalGradient(
+                            listOf(
+                                MaterialTheme.colorScheme.primary,
+                                MaterialTheme.colorScheme.tertiary
+                            )
+                        )
+                    )
+            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 14.dp, vertical = 16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = movie.title,
+                        style = MaterialTheme.typography.headlineSmall,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Default.Star,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = movie.rating.toString(),
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Icon(
+                            imageVector = Icons.Default.AccessTime,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = "${movie.durationMinutes}m",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+
+                OutlinedButton(
+                    onClick = {},
+                    shape = RoundedCornerShape(999.dp),
+                    border = androidx.compose.foundation.BorderStroke(
+                        width = 1.dp,
+                        color = MaterialTheme.colorScheme.primary
+                    ),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = MaterialTheme.colorScheme.primary
+                    )
+                ) {
+                    Text(text = movie.genre)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun HomeBottomBar(
+    selected: HomeBottomTab,
+    onTabSelected: (HomeBottomTab) -> Unit
+) {
+    NavigationBar(
+        tonalElevation = 0.dp,
+        containerColor = MaterialTheme.colorScheme.surface,
+        windowInsets = WindowInsets(0)
+    ) {
+        val items = listOf(
+            Triple(HomeBottomTab.Home, "Inicio", Icons.Default.Home),
+            Triple(HomeBottomTab.Movies, "Películas", Icons.Default.Movie),
+            Triple(HomeBottomTab.Lists, "Listas", Icons.Default.List),
+            Triple(HomeBottomTab.Settings, "Ajustes", Icons.Default.Settings)
+        )
+
+        items.forEach { (tab, label, icon) ->
+            NavigationBarItem(
+                selected = selected == tab,
+                onClick = { onTabSelected(tab) },
+                icon = {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = label
+                    )
+                },
+                label = { Text(text = label) },
+                colors = NavigationBarItemDefaults.colors(
+                    selectedIconColor = MaterialTheme.colorScheme.primary,
+                    selectedTextColor = MaterialTheme.colorScheme.primary,
+                    indicatorColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
+                    unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            )
         }
     }
 }
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
-private fun LoginScreenPreview() {
+private fun HomeScreenPreview() {
     AppTheme(dynamicColor = false) {
-        LoginScreenContent(
-            uiState = HomeUiState(),
-            onFirstNameChange = {},
-            onSecondNameChange = {},
-            onStartClick = {}
+        HomeScreenContent(
+            uiState = HomeUiState(
+                recentMovies = listOf(
+                    RecentMovieUiModel("1", "Titanic", 4, 127, "Romance"),
+                    RecentMovieUiModel("2", "Yo antes de ti", 4, 127, "Romance"),
+                    RecentMovieUiModel("3", "Harry Potter", 4, 127, "Fantasía")
+                ),
+                lists = 2
+            ),
+            onAddFirstMovieClick = {}
         )
     }
 }

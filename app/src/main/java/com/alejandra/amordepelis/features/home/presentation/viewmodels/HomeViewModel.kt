@@ -2,212 +2,124 @@ package com.alejandra.amordepelis.features.home.presentation.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.alejandra.amordepelis.features.auth.presentation.screens.AuthUiState
-import kotlinx.coroutines.delay
+import com.alejandra.amordepelis.features.home.domain.usecases.GetMetricsUseCase
+import com.alejandra.amordepelis.features.home.domain.usecases.GetRecentMoviesUseCase
+import com.alejandra.amordepelis.features.home.domain.usecases.HomeUseCases
+import com.alejandra.amordepelis.features.home.presentation.screens.HomeBottomTab
+import com.alejandra.amordepelis.features.home.presentation.screens.HomeUiState
+import com.alejandra.amordepelis.features.home.presentation.screens.RecentMovieUiModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class HomeViewModel : ViewModel() {
+class HomeViewModel(
+    private val homeUseCases: HomeUseCases = HomeUseCases(
+        login = GetMetricsUseCase(),
+        register = GetRecentMoviesUseCase()
+    )
+) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(AuthUiState())
+    private val _uiState = MutableStateFlow(HomeUiState())
     val uiState = _uiState.asStateFlow()
 
-    fun onEmailChange(email: String) {
-        _uiState.update { it.copy(email = email, error = null) }
+    init {
+        loadHome()
     }
 
-    fun onPasswordChange(password: String) {
-        _uiState.update { it.copy(password = password, error = null) }
-    }
-
-    fun onFirstNameChange(firstName: String) {
-        _uiState.update { it.copy(firstName = firstName, error = null) }
-    }
-
-    fun onSecondNameChange(secondName: String) {
-        _uiState.update { it.copy(secondName = secondName, error = null) }
-    }
-
-    fun login() {
-        val state = _uiState.value
-        if (!validateLoginInput(state.email, state.password)) return
-
-        _uiState.update { it.copy(isLoading = true, error = null, isSuccess = false) }
-
+    fun loadHome() {
         viewModelScope.launch {
-            try {
-                // TODO: Replace with actual login use case
-                delay(1500) // Simulated network call
+            _uiState.update { it.copy(isLoading = true, error = null) }
+
+            runCatching {
+                val metrics = fetchMetricsFromUseCase()
+                val recentMovies = fetchRecentMoviesFromUseCase()
 
                 _uiState.update {
                     it.copy(
-                        isLoading = false,
-                        isSuccess = true,
-                        message = "Inicio de sesión exitoso"
+                        firstPersonName = metrics.firstPersonName,
+                        secondPersonName = metrics.secondPersonName,
+                        moviesWatched = metrics.moviesWatched,
+                        favorites = metrics.favorites,
+                        averageRating = metrics.averageRating,
+                        lists = metrics.lists,
+                        recentMovies = recentMovies,
+                        isLoading = false
                     )
                 }
-            } catch (e: Exception) {
+            }.onFailure { throwable ->
                 _uiState.update {
                     it.copy(
                         isLoading = false,
-                        isSuccess = false,
-                        error = e.message ?: "Error desconocido"
+                        error = throwable.message ?: "No se pudo cargar el inicio"
                     )
                 }
             }
         }
     }
 
-    fun register(email: String, password: String, confirmPassword: String) {
-        if (!validateRegisterInput(email, password, confirmPassword)) return
-
-        _uiState.update { it.copy(isLoading = true, error = null, isSuccess = false) }
-
-        viewModelScope.launch {
-            try {
-                // TODO: Replace with actual register use case
-                delay(1500) // Simulated network call
-
-                _uiState.update {
-                    it.copy(
-                        isLoading = false,
-                        isSuccess = true,
-                        message = "Registro exitoso"
-                    )
-                }
-            } catch (e: Exception) {
-                _uiState.update {
-                    it.copy(
-                        isLoading = false,
-                        isSuccess = false,
-                        error = e.message ?: "Error desconocido"
-                    )
-                }
-            }
-        }
+    fun onBottomTabSelected(tab: HomeBottomTab) {
+        _uiState.update { it.copy(selectedBottomTab = tab) }
     }
 
-    fun forgotPassword(email: String) {
-        if (email.isBlank()) {
-            _uiState.update { it.copy(error = "Por favor ingresa tu correo electrónico") }
-            return
-        }
-
-        if (!isValidEmail(email)) {
-            _uiState.update { it.copy(error = "Por favor ingresa un correo electrónico válido") }
-            return
-        }
-
-        _uiState.update { it.copy(isLoading = true, error = null, isSuccess = false) }
-
-        viewModelScope.launch {
-            try {
-                // TODO: Replace with actual forgot password use case
-                delay(1500) // Simulated network call
-
-                _uiState.update {
-                    it.copy(
-                        isLoading = false,
-                        isSuccess = true,
-                        message = "Se ha enviado un correo para restablecer tu contraseña"
-                    )
-                }
-            } catch (e: Exception) {
-                _uiState.update {
-                    it.copy(
-                        isLoading = false,
-                        isSuccess = false,
-                        error = e.message ?: "Error desconocido"
-                    )
-                }
-            }
-        }
+    fun onAddFirstMovieClick() {
+        _uiState.update { it.copy(message = "Próximamente podrás registrar tu primera película") }
     }
 
-    fun registerCouple() {
-        val state = _uiState.value
-        if (state.firstName.isBlank()) {
-            _uiState.update { it.copy(error = "Por favor ingresa el nombre de la primera persona") }
-            return
-        }
-
-        if (state.secondName.isBlank()) {
-            _uiState.update { it.copy(error = "Por favor ingresa el nombre de la segunda persona") }
-            return
-        }
-
-        _uiState.update { it.copy(isLoading = true, error = null, isSuccess = false) }
-
-        viewModelScope.launch {
-            try {
-                // TODO: Replace with actual couple registration use case
-                delay(1500) // Simulated network call
-
-                _uiState.update {
-                    it.copy(
-                        isLoading = false,
-                        isSuccess = true,
-                        message = "¡Bienvenidos ${state.firstName} y ${state.secondName}!"
-                    )
-                }
-            } catch (e: Exception) {
-                _uiState.update {
-                    it.copy(
-                        isLoading = false,
-                        isSuccess = false,
-                        error = e.message ?: "Error desconocido"
-                    )
-                }
-            }
-        }
-    }
-
-    fun clearState() {
-        _uiState.value = AuthUiState()
+    fun clearMessage() {
+        _uiState.update { it.copy(message = null) }
     }
 
     fun clearError() {
         _uiState.update { it.copy(error = null) }
     }
 
-    private fun validateLoginInput(email: String, password: String): Boolean {
-        if (email.isBlank()) {
-            _uiState.update { it.copy(error = "Por favor ingresa tu correo electrónico") }
-            return false
-        }
-
-        if (!isValidEmail(email)) {
-            _uiState.update { it.copy(error = "Por favor ingresa un correo electrónico válido") }
-            return false
-        }
-
-        if (password.isBlank()) {
-            _uiState.update { it.copy(error = "Por favor ingresa tu contraseña") }
-            return false
-        }
-
-        if (password.length < 6) {
-            _uiState.update { it.copy(error = "La contraseña debe tener al menos 6 caracteres") }
-            return false
-        }
-
-        return true
+    private fun fetchMetricsFromUseCase(): HomeMetricsResult {
+        // Home module use cases are connected here; replace these defaults when contracts are implemented.
+        homeUseCases.login
+        return HomeMetricsResult(
+            firstPersonName = "Persona 1",
+            secondPersonName = "Persona 2",
+            moviesWatched = 0,
+            favorites = 0,
+            averageRating = 0.0,
+            lists = 2
+        )
     }
 
-    private fun validateRegisterInput(email: String, password: String, confirmPassword: String): Boolean {
-        if (!validateLoginInput(email, password)) return false
-
-        if (password != confirmPassword) {
-            _uiState.update { it.copy(error = "Las contraseñas no coinciden") }
-            return false
-        }
-
-        return true
-    }
-
-    private fun isValidEmail(email: String): Boolean {
-        return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
+    private fun fetchRecentMoviesFromUseCase(): List<RecentMovieUiModel> {
+        homeUseCases.register
+        return listOf(
+            RecentMovieUiModel(
+                id = "1",
+                title = "Titanic",
+                rating = 4,
+                durationMinutes = 127,
+                genre = "Romance"
+            ),
+            RecentMovieUiModel(
+                id = "2",
+                title = "Yo antes de ti",
+                rating = 4,
+                durationMinutes = 127,
+                genre = "Romance"
+            ),
+            RecentMovieUiModel(
+                id = "3",
+                title = "Harry Potter",
+                rating = 4,
+                durationMinutes = 127,
+                genre = "Fantasía"
+            )
+        )
     }
 }
+
+private data class HomeMetricsResult(
+    val firstPersonName: String,
+    val secondPersonName: String,
+    val moviesWatched: Int,
+    val favorites: Int,
+    val averageRating: Double,
+    val lists: Int
+)
