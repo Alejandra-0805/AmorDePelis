@@ -1,5 +1,6 @@
 package com.alejandra.amordepelis.features.home.presentation.screens
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -18,6 +19,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccessTime
@@ -30,7 +34,6 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.TrendingUp
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -51,16 +54,27 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.alejandra.amordepelis.core.ui.theme.AppTheme
 import com.alejandra.amordepelis.features.home.presentation.viewmodels.HomeViewModel
+import kotlinx.coroutines.delay
 import kotlin.math.roundToInt
 
+data class AnnouncementUiModel(
+    val id: String,
+    val title: String,
+    val description: String,
+    val imageUrl: String? = null
+)
+
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel(),
@@ -68,10 +82,17 @@ fun HomeScreen(
     onAddFirstMovieClick: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
+    val error by viewModel.error.collectAsStateWithLifecycle()
+    val message by viewModel.message.collectAsStateWithLifecycle()
+    val selectedBottomTab by viewModel.selectedBottomTab.collectAsStateWithLifecycle()
+    val announcements by viewModel.announcements.collectAsStateWithLifecycle()
+    val currentAnnouncementIndex by viewModel.currentAnnouncementIndex.collectAsStateWithLifecycle()
+    
     val snackbarHostState = remember { SnackbarHostState() }
 
-    LaunchedEffect(uiState.message) {
-        uiState.message?.let {
+    LaunchedEffect(message) {
+        message?.let {
             snackbarHostState.showSnackbar(
                 message = it,
                 duration = SnackbarDuration.Short
@@ -80,8 +101,8 @@ fun HomeScreen(
         }
     }
 
-    LaunchedEffect(uiState.error) {
-        uiState.error?.let {
+    LaunchedEffect(error) {
+        error?.let {
             snackbarHostState.showSnackbar(
                 message = it,
                 duration = SnackbarDuration.Short
@@ -95,13 +116,17 @@ fun HomeScreen(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         bottomBar = {
             HomeBottomBar(
-                selected = uiState.selectedBottomTab,
+                selected = selectedBottomTab,
                 onTabSelected = viewModel::onBottomTabSelected
             )
         }
     ) { paddingValues ->
         HomeScreenContent(
             uiState = uiState,
+            isLoading = isLoading,
+            announcements = announcements,
+            currentAnnouncementIndex = currentAnnouncementIndex,
+            onAnnouncementIndexChanged = viewModel::onAnnouncementIndexChanged,
             onAddFirstMovieClick = {
                 viewModel.onAddFirstMovieClick()
                 onAddFirstMovieClick()
@@ -111,9 +136,14 @@ fun HomeScreen(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun HomeScreenContent(
     uiState: HomeUiState,
+    isLoading: Boolean,
+    announcements: List<AnnouncementUiModel>,
+    currentAnnouncementIndex: Int,
+    onAnnouncementIndexChanged: (Int) -> Unit,
     onAddFirstMovieClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -154,6 +184,17 @@ private fun HomeScreenContent(
             }
         }
 
+        if (announcements.isNotEmpty()) {
+            item {
+                AnnouncementsCarousel(
+                    announcements = announcements,
+                    currentIndex = currentAnnouncementIndex,
+                    onIndexChanged = onAnnouncementIndexChanged,
+                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp)
+                )
+            }
+        }
+
         item {
             Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 20.dp)) {
                 MetricsGrid(uiState = uiState)
@@ -172,7 +213,7 @@ private fun HomeScreenContent(
             }
         }
 
-        if (uiState.recentMovies.isEmpty() && uiState.isLoading) {
+        if (uiState.recentMovies.isEmpty() && isLoading) {
             item {
                 Box(
                     modifier = Modifier
@@ -211,6 +252,119 @@ private fun HomeScreenContent(
                 Text(
                     text = uiState.addFirstMovieButtonLabel,
                     style = MaterialTheme.typography.titleMedium
+                )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun AnnouncementsCarousel(
+    announcements: List<AnnouncementUiModel>,
+    currentIndex: Int,
+    onIndexChanged: (Int) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val pagerState = rememberPagerState(
+        initialPage = currentIndex,
+        pageCount = { announcements.size }
+    )
+
+    LaunchedEffect(pagerState.currentPage) {
+        onIndexChanged(pagerState.currentPage)
+    }
+
+    LaunchedEffect(announcements.size) {
+        if (announcements.size > 1) {
+            while (true) {
+                delay(5000)
+                val nextPage = (pagerState.currentPage + 1) % announcements.size
+                pagerState.animateScrollToPage(nextPage)
+            }
+        }
+    }
+
+    Column(modifier = modifier) {
+        Text(
+            text = "Anuncios",
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+        
+        HorizontalPager(
+            state = pagerState,
+            modifier = Modifier.fillMaxWidth()
+        ) { page ->
+            AnnouncementCard(
+                announcement = announcements[page],
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+
+        if (announcements.size > 1) {
+            Spacer(modifier = Modifier.height(12.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                repeat(announcements.size) { index ->
+                    val isSelected = pagerState.currentPage == index
+                    Box(
+                        modifier = Modifier
+                            .padding(horizontal = 4.dp)
+                            .size(if (isSelected) 10.dp else 8.dp)
+                            .clip(CircleShape)
+                            .background(
+                                if (isSelected) MaterialTheme.colorScheme.primary
+                                else MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
+                            )
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun AnnouncementCard(
+    announcement: AnnouncementUiModel,
+    modifier: Modifier = Modifier
+) {
+    val cardGradient = Brush.horizontalGradient(
+        colors = listOf(
+            MaterialTheme.colorScheme.primaryContainer,
+            MaterialTheme.colorScheme.tertiaryContainer
+        )
+    )
+
+    Card(
+        modifier = modifier,
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(cardGradient)
+                .padding(20.dp)
+        ) {
+            Column {
+                Text(
+                    text = announcement.title,
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = announcement.description,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.85f),
+                    textAlign = TextAlign.Start
                 )
             }
         }
@@ -462,6 +616,21 @@ private fun HomeScreenPreview() {
                 ),
                 lists = 2
             ),
+            isLoading = false,
+            announcements = listOf(
+                AnnouncementUiModel(
+                    id = "1",
+                    title = "¡Nueva función disponible!",
+                    description = "Ahora puedes agregar películas a tus listas favoritas."
+                ),
+                AnnouncementUiModel(
+                    id = "2",
+                    title = "Comparte tu amor por el cine",
+                    description = "Invita a tu pareja a usar AmorDePelis juntos."
+                )
+            ),
+            currentAnnouncementIndex = 0,
+            onAnnouncementIndexChanged = {},
             onAddFirstMovieClick = {}
         )
     }

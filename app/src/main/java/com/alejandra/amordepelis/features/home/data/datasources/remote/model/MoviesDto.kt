@@ -1,10 +1,14 @@
 package com.alejandra.amordepelis.features.home.data.datasources.remote.model
 
-//Hacer una clase movie y que movies sea un string de ellas
+import com.google.gson.annotations.SerializedName
 
-data class MoviesDto(
+data class MovieDto(
     val id: String,
     val title: String,
-    val description: String,
-    val releaseDate: String,
+    val rating: Int,
+    @SerializedName("duration_minutes")
+    val durationMinutes: Int,
+    val genre: String,
+    @SerializedName("poster_url")
+    val posterUrl: String? = null
 )

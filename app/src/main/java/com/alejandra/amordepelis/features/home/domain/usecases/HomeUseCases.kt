@@ -2,7 +2,8 @@ package com.alejandra.amordepelis.features.home.domain.usecases
 
 import javax.inject.Inject
 
-class HomeUseCases @Inject constructor(
-    val login: GetMetricsUseCase,
-    val register: GetRecentMoviesUseCase
+data class HomeUseCases @Inject constructor(
+    val getMetrics: GetMetricsUseCase,
+    val getRecentMovies: GetRecentMoviesUseCase,
+    val getAnnouncements: GetAnnouncementsUseCase
 )
