@@ -7,15 +7,19 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.alejandra.amordepelis.core.ui.theme.AppTheme
 import com.alejandra.amordepelis.features.lists.presentation.components.AddListFormCard
 import com.alejandra.amordepelis.features.lists.presentation.components.ListsHeader
@@ -23,10 +27,14 @@ import com.alejandra.amordepelis.features.lists.presentation.viewmodels.ListsVie
 
 @Composable
 fun AddListScreen(
-    viewModel: ListsViewModel = viewModel(),
+    viewModel: ListsViewModel = hiltViewModel(),
     onSaved: () -> Unit = {}
 ) {
     val uiState by viewModel.addListUiState.collectAsStateWithLifecycle()
+    val message by viewModel.message.collectAsStateWithLifecycle()
+    val error by viewModel.error.collectAsStateWithLifecycle()
+
+    val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(uiState.isSaved) {
         if (uiState.isSaved) {
@@ -35,7 +43,30 @@ fun AddListScreen(
         }
     }
 
-    Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+    LaunchedEffect(message) {
+        message?.let {
+            snackbarHostState.showSnackbar(
+                message = it,
+                duration = SnackbarDuration.Short
+            )
+            viewModel.clearMessage()
+        }
+    }
+
+    LaunchedEffect(error) {
+        error?.let {
+            snackbarHostState.showSnackbar(
+                message = it,
+                duration = SnackbarDuration.Short
+            )
+            viewModel.clearError()
+        }
+    }
+
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
+        snackbarHost = { SnackbarHost(snackbarHostState) }
+    ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()

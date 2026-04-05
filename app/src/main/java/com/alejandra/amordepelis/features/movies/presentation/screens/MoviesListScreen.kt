@@ -19,19 +19,22 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
+import com.alejandra.amordepelis.features.movies.presentation.components.AnnouncementCarousel
 import com.alejandra.amordepelis.features.movies.presentation.components.MovieListItemCard
 import com.alejandra.amordepelis.features.movies.presentation.components.MoviesTopHeader
 import com.alejandra.amordepelis.features.movies.presentation.viewmodels.MoviesViewModel
 
 @Composable
 fun MoviesListScreen(
-    viewModel: MoviesViewModel = viewModel(),
+    viewModel: MoviesViewModel = hiltViewModel(),
     onMovieClick: (String) -> Unit = {},
     onAddMovieClick: () -> Unit = {}
 ) {
     val uiState by viewModel.listUiState.collectAsStateWithLifecycle()
+    val announcements by viewModel.announcements.collectAsStateWithLifecycle()
+    val currentAnnouncementIndex by viewModel.currentAnnouncementIndex.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
         viewModel.loadMovies()
@@ -46,6 +49,15 @@ fun MoviesListScreen(
             MoviesTopHeader(
                 title = "Nuestra Cartelera",
                 subtitle = "Persona 1 & Persona 2"
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            AnnouncementCarousel(
+                announcements = announcements,
+                currentIndex = currentAnnouncementIndex,
+                onIndexChange = viewModel::onAnnouncementIndexChange,
+                modifier = Modifier.fillMaxWidth()
             )
 
             Spacer(modifier = Modifier.height(20.dp))

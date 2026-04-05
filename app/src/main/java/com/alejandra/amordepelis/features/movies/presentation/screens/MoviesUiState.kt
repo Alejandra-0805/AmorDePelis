@@ -28,3 +28,10 @@ data class AddMovieUiState(
     val isSaved: Boolean = false,
     val error: String? = null
 )
+
+data class Announcement(
+    val id: String,
+    val title: String,
+    val description: String,
+    val imageUrl: String
+)

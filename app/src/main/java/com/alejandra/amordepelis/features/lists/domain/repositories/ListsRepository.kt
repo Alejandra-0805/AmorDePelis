@@ -1,5 +1,6 @@
 package com.alejandra.amordepelis.features.lists.domain.repositories
 
+import com.alejandra.amordepelis.features.lists.domain.entities.Announcement
 import com.alejandra.amordepelis.features.lists.domain.entities.CreateListParams
 import com.alejandra.amordepelis.features.lists.domain.entities.SharedList
 import com.alejandra.amordepelis.features.lists.domain.entities.SharedListDetails
@@ -11,4 +12,5 @@ interface ListsRepository {
     suspend fun createSharedList(params: CreateListParams): SharedList
     suspend fun updateSharedList(params: UpdateListParams)
     suspend fun deleteSharedList(listId: String)
+    suspend fun getAnnouncements(): List<Announcement>
 }

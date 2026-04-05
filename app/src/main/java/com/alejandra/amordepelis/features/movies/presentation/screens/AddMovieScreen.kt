@@ -13,15 +13,15 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.alejandra.amordepelis.features.movies.presentation.components.MovieFormCard
 import com.alejandra.amordepelis.features.movies.presentation.components.MoviesTopHeader
 import com.alejandra.amordepelis.features.movies.presentation.viewmodels.MoviesViewModel
 
 @Composable
 fun AddMovieScreen(
-    viewModel: MoviesViewModel = viewModel(),
+    viewModel: MoviesViewModel = hiltViewModel(),
     onMovieSaved: () -> Unit = {}
 ) {
     val uiState by viewModel.addUiState.collectAsStateWithLifecycle()

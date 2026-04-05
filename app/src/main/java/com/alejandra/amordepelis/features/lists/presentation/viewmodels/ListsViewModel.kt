@@ -2,43 +2,65 @@ package com.alejandra.amordepelis.features.lists.presentation.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.alejandra.amordepelis.features.lists.di.ListsUseCaseModule
 import com.alejandra.amordepelis.features.lists.domain.entities.CreateListParams
 import com.alejandra.amordepelis.features.lists.domain.entities.UpdateListParams
 import com.alejandra.amordepelis.features.lists.domain.usecases.ListsUseCases
 import com.alejandra.amordepelis.features.lists.presentation.screens.AddListUiState
+import com.alejandra.amordepelis.features.lists.presentation.screens.AnnouncementUiModel
 import com.alejandra.amordepelis.features.lists.presentation.screens.DeleteListModalUiState
 import com.alejandra.amordepelis.features.lists.presentation.screens.EditListModalUiState
 import com.alejandra.amordepelis.features.lists.presentation.screens.ListDetailsUiState
 import com.alejandra.amordepelis.features.lists.presentation.screens.ListsScreenUiState
 import com.alejandra.amordepelis.features.lists.presentation.screens.SharedListItemUiModel
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class ListsViewModel(
-    private val useCases: ListsUseCases = ListsUseCaseModule.provideListsUseCases()
+@HiltViewModel
+class ListsViewModel @Inject constructor(
+    private val useCases: ListsUseCases
 ) : ViewModel() {
 
     private val _listsUiState = MutableStateFlow(ListsScreenUiState())
-    val listsUiState = _listsUiState.asStateFlow()
+    val listsUiState: StateFlow<ListsScreenUiState> = _listsUiState.asStateFlow()
 
     private val _addListUiState = MutableStateFlow(AddListUiState())
-    val addListUiState = _addListUiState.asStateFlow()
+    val addListUiState: StateFlow<AddListUiState> = _addListUiState.asStateFlow()
 
     private val _detailsUiState = MutableStateFlow(ListDetailsUiState())
-    val detailsUiState = _detailsUiState.asStateFlow()
+    val detailsUiState: StateFlow<ListDetailsUiState> = _detailsUiState.asStateFlow()
 
     private val _editModalUiState = MutableStateFlow(EditListModalUiState())
-    val editModalUiState = _editModalUiState.asStateFlow()
+    val editModalUiState: StateFlow<EditListModalUiState> = _editModalUiState.asStateFlow()
 
     private val _deleteModalUiState = MutableStateFlow(DeleteListModalUiState())
-    val deleteModalUiState = _deleteModalUiState.asStateFlow()
+    val deleteModalUiState: StateFlow<DeleteListModalUiState> = _deleteModalUiState.asStateFlow()
+
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+
+    private val _error = MutableStateFlow<String?>(null)
+    val error: StateFlow<String?> = _error.asStateFlow()
+
+    private val _message = MutableStateFlow<String?>(null)
+    val message: StateFlow<String?> = _message.asStateFlow()
+
+    private val _announcements = MutableStateFlow<List<AnnouncementUiModel>>(emptyList())
+    val announcements: StateFlow<List<AnnouncementUiModel>> = _announcements.asStateFlow()
+
+    private val _currentAnnouncementIndex = MutableStateFlow(0)
+    val currentAnnouncementIndex: StateFlow<Int> = _currentAnnouncementIndex.asStateFlow()
 
     fun loadSharedLists() {
         viewModelScope.launch {
+            _isLoading.value = true
+            _error.value = null
             _listsUiState.update { it.copy(isLoading = true, error = null) }
+            
             runCatching { useCases.getSharedLists() }
                 .onSuccess { lists ->
                     _listsUiState.update {
@@ -55,12 +77,32 @@ class ListsViewModel(
                             }
                         )
                     }
+                    _isLoading.value = false
                 }
                 .onFailure { throwable ->
                     _listsUiState.update {
                         it.copy(isLoading = false, error = throwable.message ?: "Error loading lists")
                     }
+                    _isLoading.value = false
+                    _error.value = throwable.message ?: "Error loading lists"
                 }
+        }
+    }
+
+    fun loadAnnouncements() {
+        viewModelScope.launch {
+            runCatching { useCases.getAnnouncements() }
+                .onSuccess { announcements ->
+                    _announcements.value = announcements.map { announcement ->
+                        AnnouncementUiModel(
+                            id = announcement.id,
+                            title = announcement.title,
+                            description = announcement.description,
+                            imageUrl = announcement.imageUrl
+                        )
+                    }
+                }
+                .onFailure { /* Ignore announcement loading errors */ }
         }
     }
 
@@ -122,6 +164,7 @@ class ListsViewModel(
                         description = ""
                     )
                 }
+                _message.value = "Lista creada exitosamente"
             }.onFailure { throwable ->
                 _addListUiState.update {
                     it.copy(isLoading = false, error = throwable.message ?: "Error creating list")
@@ -132,6 +175,10 @@ class ListsViewModel(
 
     fun resetCreateListState() {
         _addListUiState.update { it.copy(isSaved = false, error = null) }
+    }
+
+    fun onAnnouncementIndexChanged(index: Int) {
+        _currentAnnouncementIndex.value = index
     }
 
     fun openEditModal(list: SharedListItemUiModel) {
@@ -175,6 +222,7 @@ class ListsViewModel(
             }.onSuccess {
                 closeEditModal()
                 loadSharedLists()
+                _message.value = "Lista actualizada exitosamente"
             }.onFailure { throwable ->
                 _editModalUiState.update {
                     it.copy(isSaving = false, error = throwable.message ?: "Error updating list")
@@ -203,6 +251,7 @@ class ListsViewModel(
                 .onSuccess {
                     closeDeleteModal()
                     loadSharedLists()
+                    _message.value = "Lista eliminada exitosamente"
                 }
                 .onFailure { throwable ->
                     _deleteModalUiState.update {
@@ -210,5 +259,13 @@ class ListsViewModel(
                     }
                 }
         }
+    }
+
+    fun clearMessage() {
+        _message.value = null
+    }
+
+    fun clearError() {
+        _error.value = null
     }
 }

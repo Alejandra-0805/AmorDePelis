@@ -10,6 +10,13 @@ data class SharedListItemUiModel(
     val colorHex: String
 )
 
+data class AnnouncementUiModel(
+    val id: String,
+    val title: String,
+    val description: String,
+    val imageUrl: String? = null
+)
+
 data class ListsScreenUiState(
     val screenTitle: String = "Listas Compartidas",
     val subtitle: String = "Creen listas personalizadas para organizar sus peliculas juntos",
