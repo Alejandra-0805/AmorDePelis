@@ -19,3 +19,12 @@ object ListDetails
 
 @Serializable
 object AddList
+
+@Serializable
+object Movies
+
+@Serializable
+object MovieDetails
+
+@Serializable
+object AddMovie
