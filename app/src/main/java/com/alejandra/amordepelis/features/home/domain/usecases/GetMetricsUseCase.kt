@@ -1,4 +1,6 @@
 package com.alejandra.amordepelis.features.home.domain.usecases
 
-class GetMetricsUseCase {
+import javax.inject.Inject
+
+class GetMetricsUseCase @Inject constructor() {
 }

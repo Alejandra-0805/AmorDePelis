@@ -1,4 +1,6 @@
 package com.alejandra.amordepelis.features.home.domain.usecases
 
-class GetRecentMoviesUseCase {
+import javax.inject.Inject
+
+class GetRecentMoviesUseCase @Inject constructor() {
 }

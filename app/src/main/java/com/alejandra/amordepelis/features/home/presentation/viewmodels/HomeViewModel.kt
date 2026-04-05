@@ -2,22 +2,20 @@ package com.alejandra.amordepelis.features.home.presentation.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.alejandra.amordepelis.features.home.domain.usecases.GetMetricsUseCase
-import com.alejandra.amordepelis.features.home.domain.usecases.GetRecentMoviesUseCase
 import com.alejandra.amordepelis.features.home.domain.usecases.HomeUseCases
 import com.alejandra.amordepelis.features.home.presentation.screens.HomeBottomTab
 import com.alejandra.amordepelis.features.home.presentation.screens.HomeUiState
 import com.alejandra.amordepelis.features.home.presentation.screens.RecentMovieUiModel
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class HomeViewModel(
-    private val homeUseCases: HomeUseCases = HomeUseCases(
-        login = GetMetricsUseCase(),
-        register = GetRecentMoviesUseCase()
-    )
+@HiltViewModel
+class HomeViewModel @Inject constructor(
+    private val homeUseCases: HomeUseCases
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(HomeUiState())

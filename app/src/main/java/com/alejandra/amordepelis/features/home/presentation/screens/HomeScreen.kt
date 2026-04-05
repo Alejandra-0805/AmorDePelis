@@ -55,15 +55,15 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.alejandra.amordepelis.core.ui.theme.AppTheme
 import com.alejandra.amordepelis.features.home.presentation.viewmodels.HomeViewModel
 import kotlin.math.roundToInt
 
 @Composable
 fun HomeScreen(
-    viewModel: HomeViewModel = viewModel(),
+    viewModel: HomeViewModel = hiltViewModel(),
     modifier: Modifier = Modifier,
     onAddFirstMovieClick: () -> Unit = {}
 ) {
