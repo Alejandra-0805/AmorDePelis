@@ -73,9 +73,13 @@ dependencies {
     implementation(libs.retrofit.gson)
     // Lifecycle ViewModel Compose
     implementation(libs.androidx.lifecycle.viewmodel.compose)
+
+    // DataStore
+    implementation(libs.androidx.datastore.preferences)
     // Hilt
     implementation(libs.hilt.android)
     implementation(libs.hilt.navigation.compose)
+    implementation(libs.androidx.datastore.core)
     ksp(libs.hilt.compiler)
 
     testImplementation(libs.junit)
