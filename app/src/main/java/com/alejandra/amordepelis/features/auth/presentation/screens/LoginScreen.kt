@@ -41,12 +41,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.alejandra.amordepelis.core.ui.theme.AppTheme
 import com.alejandra.amordepelis.core.ui.theme.CoupleButtonGradientEnd
 import com.alejandra.amordepelis.core.ui.theme.CoupleButtonGradientStart
@@ -54,21 +55,32 @@ import com.alejandra.amordepelis.core.ui.theme.CoupleIconTint
 import com.alejandra.amordepelis.core.ui.theme.GradientBlueEnd
 import com.alejandra.amordepelis.core.ui.theme.GradientCyan
 import com.alejandra.amordepelis.core.ui.theme.GradientPurpleStart
+import com.alejandra.amordepelis.features.auth.data.datasources.remote.model.LoginRequest
 import com.alejandra.amordepelis.features.auth.presentation.viewmodels.AuthViewModel
 
 @Composable
 fun LoginScreen(
-    viewModel: AuthViewModel = viewModel(),
+    viewModel: AuthViewModel = hiltViewModel(),
     modifier: Modifier = Modifier,
-    onLoginSuccess: () -> Unit = {}
+    onLoginSuccess: () -> Unit = {},
+    onNavigateToRegister: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val email by viewModel.email.collectAsStateWithLifecycle()
+    val password by viewModel.password.collectAsStateWithLifecycle()
+
     val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(uiState.isSuccess) {
         if (uiState.isSuccess) {
             onLoginSuccess()
             viewModel.clearState()
+        }
+    }
+
+    LaunchedEffect(uiState.error) {
+        uiState.error?.let {
+            snackbarHostState.showSnackbar(it)
         }
     }
 
@@ -84,9 +96,11 @@ fun LoginScreen(
     ) { paddingValues ->
         LoginScreenContent(
             uiState = uiState,
-            onFirstNameChange = viewModel::onFirstNameChange,
-            onSecondNameChange = viewModel::onSecondNameChange,
-            onStartClick = viewModel::registerCouple,
+            email = email,
+            password = password,
+            onEmailChange = viewModel::onEmailChange,
+            onPasswordChange = viewModel::onPasswordChange,
+            onLoginClick = { viewModel.login(LoginRequest(email = email, password = password)) },
             modifier = Modifier.padding(paddingValues)
         )
     }
@@ -95,9 +109,11 @@ fun LoginScreen(
 @Composable
 private fun LoginScreenContent(
     uiState: AuthUiState,
-    onFirstNameChange: (String) -> Unit,
-    onSecondNameChange: (String) -> Unit,
-    onStartClick: () -> Unit,
+    email: String,
+    password: String,
+    onEmailChange: (String) -> Unit,
+    onPasswordChange: (String) -> Unit,
+    onLoginClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val backgroundGradient = Brush.verticalGradient(
@@ -115,8 +131,8 @@ private fun LoginScreenContent(
         )
     )
 
-    val isButtonEnabled = uiState.firstName.isNotBlank() && 
-                          uiState.secondName.isNotBlank() && 
+    val isButtonEnabled = email.isNotBlank() && 
+                          password.isNotBlank() && 
                           !uiState.isLoading
 
     Box(
@@ -208,18 +224,18 @@ private fun LoginScreenContent(
                     Spacer(modifier = Modifier.height(24.dp))
 
                     Text(
-                        text = "Nombre de la primera persona",
+                        text = "Correo electrónico",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.fillMaxWidth()
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     OutlinedTextField(
-                        value = uiState.firstName,
-                        onValueChange = onFirstNameChange,
+                        value = email,
+                        onValueChange = onEmailChange,
                         placeholder = {
                             Text(
-                                text = "Ej: María",
+                                text = "ejemplo@correo.com",
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         },
@@ -239,24 +255,25 @@ private fun LoginScreenContent(
                     Spacer(modifier = Modifier.height(16.dp))
 
                     Text(
-                        text = "Nombre de la segunda persona",
+                        text = "Contraseña",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.fillMaxWidth()
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     OutlinedTextField(
-                        value = uiState.secondName,
-                        onValueChange = onSecondNameChange,
+                        value = password,
+                        onValueChange = onPasswordChange,
                         placeholder = {
                             Text(
-                                text = "Ej: Carlos",
+                                text = "Tu contraseña",
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true,
                         enabled = !uiState.isLoading,
+                        visualTransformation = PasswordVisualTransformation(),
                         shape = RoundedCornerShape(12.dp),
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedBorderColor = MaterialTheme.colorScheme.primary,
@@ -280,7 +297,7 @@ private fun LoginScreenContent(
                     Spacer(modifier = Modifier.height(24.dp))
 
                     Button(
-                        onClick = onStartClick,
+                        onClick = onLoginClick,
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(56.dp),
@@ -327,7 +344,7 @@ private fun LoginScreenContent(
                                     )
                                     Spacer(modifier = Modifier.size(8.dp))
                                     Text(
-                                        text = "Comenzar",
+                                        text = "Iniciar Sesión",
                                         style = MaterialTheme.typography.labelLarge,
                                         color = MaterialTheme.colorScheme.onPrimary
                                     )
@@ -349,9 +366,11 @@ private fun LoginScreenPreview() {
     AppTheme(dynamicColor = false) {
         LoginScreenContent(
             uiState = AuthUiState(),
-            onFirstNameChange = {},
-            onSecondNameChange = {},
-            onStartClick = {}
+            email = "",
+            password = "",
+            onEmailChange = {},
+            onPasswordChange = {},
+            onLoginClick = {}
         )
     }
 }
