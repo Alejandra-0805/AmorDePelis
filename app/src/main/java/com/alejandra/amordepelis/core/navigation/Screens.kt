@@ -28,3 +28,6 @@ object MovieDetails
 
 @Serializable
 object AddMovie
+
+@Serializable
+object User
