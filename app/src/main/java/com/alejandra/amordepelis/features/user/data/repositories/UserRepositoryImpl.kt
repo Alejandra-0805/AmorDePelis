@@ -7,8 +7,9 @@ import com.alejandra.amordepelis.features.user.domain.entities.PartnerInvitation
 import com.alejandra.amordepelis.features.user.domain.entities.UserProfile
 import com.alejandra.amordepelis.features.user.domain.entities.UserSearchResult
 import com.alejandra.amordepelis.features.user.domain.repositories.UserRepository
+import javax.inject.Inject
 
-class UserRepositoryImpl(
+class UserRepositoryImpl @Inject constructor(
     private val userApi: UserApi
 ) : UserRepository {
     override suspend fun getUserProfile(): UserProfile {

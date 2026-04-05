@@ -27,3 +27,10 @@ data class PartnerSearchUiState(
     val error: String? = null,
     val message: String? = null
 )
+
+data class UserAnnouncement(
+    val id: String,
+    val title: String,
+    val description: String,
+    val imageUrl: String
+)
