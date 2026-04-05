@@ -10,3 +10,12 @@ object Register
 
 @Serializable
 object Home
+
+@Serializable
+object Lists
+
+@Serializable
+object ListDetails
+
+@Serializable
+object AddList
