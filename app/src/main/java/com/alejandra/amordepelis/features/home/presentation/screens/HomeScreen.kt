@@ -2,14 +2,12 @@ package com.alejandra.amordepelis.features.home.presentation.screens
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -26,10 +24,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Movie
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.TrendingUp
 import androidx.compose.material3.Button
@@ -38,13 +34,9 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -85,7 +77,6 @@ fun HomeScreen(
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
     val error by viewModel.error.collectAsStateWithLifecycle()
     val message by viewModel.message.collectAsStateWithLifecycle()
-    val selectedBottomTab by viewModel.selectedBottomTab.collectAsStateWithLifecycle()
     val announcements by viewModel.announcements.collectAsStateWithLifecycle()
     val currentAnnouncementIndex by viewModel.currentAnnouncementIndex.collectAsStateWithLifecycle()
     
@@ -111,16 +102,7 @@ fun HomeScreen(
         }
     }
 
-    Scaffold(
-        modifier = modifier.fillMaxSize(),
-        snackbarHost = { SnackbarHost(snackbarHostState) },
-        bottomBar = {
-            HomeBottomBar(
-                selected = selectedBottomTab,
-                onTabSelected = viewModel::onBottomTabSelected
-            )
-        }
-    ) { paddingValues ->
+    Box(modifier = modifier.fillMaxSize()) {
         HomeScreenContent(
             uiState = uiState,
             isLoading = isLoading,
@@ -131,7 +113,12 @@ fun HomeScreen(
                 viewModel.onAddFirstMovieClick()
                 onAddFirstMovieClick()
             },
-            modifier = Modifier.padding(paddingValues)
+            modifier = Modifier.fillMaxSize()
+        )
+        
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier.align(Alignment.BottomCenter)
         )
     }
 }
@@ -559,46 +546,6 @@ private fun MovieItemCard(
                     Text(text = movie.genre)
                 }
             }
-        }
-    }
-}
-
-@Composable
-private fun HomeBottomBar(
-    selected: HomeBottomTab,
-    onTabSelected: (HomeBottomTab) -> Unit
-) {
-    NavigationBar(
-        tonalElevation = 0.dp,
-        containerColor = MaterialTheme.colorScheme.surface,
-        windowInsets = WindowInsets(0)
-    ) {
-        val items = listOf(
-            Triple(HomeBottomTab.Home, "Inicio", Icons.Default.Home),
-            Triple(HomeBottomTab.Movies, "Películas", Icons.Default.Movie),
-            Triple(HomeBottomTab.Lists, "Listas", Icons.Default.List),
-            Triple(HomeBottomTab.Settings, "Ajustes", Icons.Default.Settings)
-        )
-
-        items.forEach { (tab, label, icon) ->
-            NavigationBarItem(
-                selected = selected == tab,
-                onClick = { onTabSelected(tab) },
-                icon = {
-                    Icon(
-                        imageVector = icon,
-                        contentDescription = label
-                    )
-                },
-                label = { Text(text = label) },
-                colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = MaterialTheme.colorScheme.primary,
-                    selectedTextColor = MaterialTheme.colorScheme.primary,
-                    indicatorColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
-                    unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                    unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            )
         }
     }
 }

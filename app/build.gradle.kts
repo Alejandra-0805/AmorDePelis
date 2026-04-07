@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.secrets.gradle)
+    alias(libs.plugins.kotlin.serialization)
 
     // Activa Hilt y KSP
     alias(libs.plugins.devtools.ksp)
@@ -10,9 +11,7 @@ plugins {
 
 android {
     namespace = "com.alejandra.amordepelis"
-    compileSdk {
-        version = release(36)
-    }
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.alejandra.amordepelis"
@@ -67,6 +66,10 @@ dependencies {
     implementation(libs.androidx.compose.ui.text.google.fonts)
     implementation(libs.androidx.lifecycle.viewmodel.compose)       // viewModel()
     implementation(libs.io.coil.kt.coil.compose)
+
+    // Navigation & Serialization
+    implementation(libs.androidx.navigation.compose)
+    implementation(libs.kotlinx.serialization.json)
 
     // Retrofit & OkHttp
     implementation(libs.retrofit.core)

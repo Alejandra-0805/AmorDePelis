@@ -1,7 +1,9 @@
 package com.alejandra.amordepelis.features.auth.domain.entities
 
 data class RegisterResponse(
-    val id: String,
+    val id: Int,
     val email: String,
-    val message: String
+    val role: String,
+    val username: String?,
+    val profileImageUrl: String?
 )

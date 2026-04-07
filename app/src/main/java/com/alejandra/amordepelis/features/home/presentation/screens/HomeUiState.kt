@@ -10,7 +10,6 @@ data class HomeUiState(
     val lists: Int = 0,
     val recentMovies: List<RecentMovieUiModel> = emptyList(),
     val addFirstMovieButtonLabel: String = "Agregar primera película",
-    val selectedBottomTab: HomeBottomTab = HomeBottomTab.Home,
     val isLoading: Boolean = false,
     val message: String? = null,
     val error: String? = null
@@ -23,10 +22,3 @@ data class RecentMovieUiModel(
     val durationMinutes: Int,
     val genre: String
 )
-
-enum class HomeBottomTab {
-    Home,
-    Movies,
-    Lists,
-    Settings
-}

@@ -7,6 +7,8 @@ fun RegisterResponseDto.registerToDomain(): RegisterResponse {
     return RegisterResponse(
         id = this.id,
         email = this.email,
-        message = this.message
+        role = this.role,
+        username = this.username,
+        profileImageUrl = this.profileImageUrl
     )
 }
