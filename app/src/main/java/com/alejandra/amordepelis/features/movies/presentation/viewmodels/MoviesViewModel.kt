@@ -201,4 +201,26 @@ class MoviesViewModel @Inject constructor(
     fun resetAddMovieState() {
         _addUiState.update { it.copy(isSaved = false, error = null) }
     }
+
+    fun addMovieToRoomOrList(movieId: String, roomId: String? = null, listId: String? = null) {
+        viewModelScope.launch {
+            if (roomId == null && listId == null) {
+                _detailsUiState.update { it.copy(error = "Debes seleccionar una sala o lista") }
+                return@launch
+            }
+            
+            runCatching {
+                // TODO: Implement actual use cases explicitly 
+                // e.g. useCases.addMovieToRoom(roomId, movieId)
+                // e.g. useCases.addMovieToList(listId, movieId)
+            }.onSuccess {
+                // Update UI state upon success
+                _detailsUiState.update { it.copy(error = null) }
+            }.onFailure { throwable ->
+                _detailsUiState.update {
+                    it.copy(error = throwable.message ?: "Error al agregar la película")
+                }
+            }
+        }
+    }
 }

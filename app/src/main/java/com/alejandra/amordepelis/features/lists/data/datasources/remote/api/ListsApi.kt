@@ -5,6 +5,7 @@ import com.alejandra.amordepelis.features.lists.data.datasources.remote.model.Cr
 import com.alejandra.amordepelis.features.lists.data.datasources.remote.model.SharedListDetailsDto
 import com.alejandra.amordepelis.features.lists.data.datasources.remote.model.SharedListDto
 import com.alejandra.amordepelis.features.lists.data.datasources.remote.model.UpdateListRequestDto
+import com.alejandra.amordepelis.features.lists.data.datasources.remote.model.CustomListDto
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
@@ -19,8 +20,11 @@ interface ListsApi {
     @GET("lists/{listId}")
     suspend fun getSharedListDetails(@Path("listId") listId: String): SharedListDetailsDto
 
-    @POST("lists")
-    suspend fun createSharedList(@Body request: CreateListRequestDto): SharedListDto
+    @POST("rooms/{roomId}/lists")
+    suspend fun createSharedListByRoom(
+        @Path("roomId") roomId: String,
+        @Body request: CreateListRequestDto
+    ): SharedListDto
 
     @PUT("lists")
     suspend fun updateSharedList(@Body request: UpdateListRequestDto)
@@ -30,4 +34,14 @@ interface ListsApi {
 
     @GET("lists/announcements")
     suspend fun getAnnouncements(): List<AnnouncementDto>
+
+    @GET("rooms/{roomId}/lists")
+    suspend fun getListsByRoom(@Path("roomId") roomId: String): List<SharedListDto>
+
+    @POST("rooms/{roomId}/lists/{listId}/movies/{movieId}")
+    suspend fun addMovieToList(
+        @Path("roomId") roomId: String,
+        @Path("listId") listId: String,
+        @Path("movieId") movieId: String
+    )
 }

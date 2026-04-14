@@ -79,12 +79,18 @@ class ListsViewModel @Inject constructor(
     fun canCreateLists(): Boolean = sessionManager.canCreateLists()
 
     fun loadSharedLists() {
+        val roomId = sessionManager.currentRoomId.value
+        if (roomId == null) {
+            _error.value = "No estás en una sala. Por favor, crea o únete a una sala."
+            return
+        }
+
         viewModelScope.launch {
             _isLoading.value = true
             _error.value = null
             _listsUiState.update { it.copy(isLoading = true, error = null) }
             
-            runCatching { useCases.getSharedLists() }
+            runCatching { useCases.getSharedLists(roomId) }
                 .onSuccess { lists ->
                     _listsUiState.update {
                         it.copy(
@@ -168,6 +174,12 @@ class ListsViewModel @Inject constructor(
             return
         }
 
+        val roomId = sessionManager.currentRoomId.value
+        if (roomId == null) {
+            _addListUiState.update { it.copy(error = "No estás en una sala.") }
+            return
+        }
+
         val state = _addListUiState.value
         if (state.name.isBlank()) {
             _addListUiState.update { it.copy(error = "El nombre de la lista es obligatorio") }
@@ -178,6 +190,7 @@ class ListsViewModel @Inject constructor(
             _addListUiState.update { it.copy(isLoading = true, error = null) }
             runCatching {
                 useCases.createSharedList(
+                    roomId,
                     CreateListParams(
                         name = state.name,
                         description = state.description,

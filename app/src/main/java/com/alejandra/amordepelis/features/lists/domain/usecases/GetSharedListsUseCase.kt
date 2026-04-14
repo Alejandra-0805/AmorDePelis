@@ -7,5 +7,5 @@ import javax.inject.Inject
 class GetSharedListsUseCase @Inject constructor(
     private val repository: ListsRepository
 ) {
-    suspend operator fun invoke(): List<SharedList> = repository.getSharedLists()
+    suspend operator fun invoke(roomId: String): List<SharedList> = repository.getSharedLists(roomId)
 }

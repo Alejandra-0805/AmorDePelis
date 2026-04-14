@@ -43,4 +43,10 @@ interface UserApi {
 
     @GET("rooms")
     suspend fun getUserRooms(): List<RoomResponseDto>
+
+    @POST("rooms/{roomId}/movies/{movieId}")
+    suspend fun addMovieToRoom(
+        @Path("roomId") roomId: String,
+        @Path("movieId") movieId: String
+    )
 }

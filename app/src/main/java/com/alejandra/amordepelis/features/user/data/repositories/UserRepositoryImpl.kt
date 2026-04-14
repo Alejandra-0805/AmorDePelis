@@ -8,6 +8,7 @@ import com.alejandra.amordepelis.features.user.domain.entities.PartnerInvitation
 import com.alejandra.amordepelis.features.user.domain.entities.UserProfile
 import com.alejandra.amordepelis.features.user.domain.entities.UserSearchResult
 import com.alejandra.amordepelis.features.user.domain.repositories.UserRepository
+import com.alejandra.amordepelis.core.storage.TokenDataStore
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONObject
@@ -16,7 +17,8 @@ import android.util.Base64
 
 class UserRepositoryImpl @Inject constructor(
     private val userApi: UserApi,
-    private val tokenProvider: TokenProvider
+    private val tokenProvider: TokenProvider,
+    private val tokenDataStore: TokenDataStore
 ) : UserRepository {
     override suspend fun getUserProfile(): UserProfile {
         val token = tokenProvider.getToken() ?: throw Exception("No token available")
@@ -38,6 +40,9 @@ class UserRepositoryImpl @Inject constructor(
                 
                 roomName = room.roomName
                 ownInviteCode = room.invitationCode
+                
+                // Save roomId into datastore so Lists feature can use it
+                tokenDataStore.saveRoomId(room.id.toString())
                 
                 // Si la sala tiene ambos (creador e invitado), detectamos que hay un partner.
                 if (room.creatorId != null && room.guestId != null) {
