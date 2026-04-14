@@ -14,4 +14,7 @@ interface HomeApi {
 
     @GET("announcements")
     suspend fun getAnnouncements(): List<AnnouncementDto>
+
+    @GET("news/latest")
+    suspend fun getLatestNews(): AnnouncementDto
 }

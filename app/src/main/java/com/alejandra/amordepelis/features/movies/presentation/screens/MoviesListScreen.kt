@@ -1,6 +1,7 @@
 package com.alejandra.amordepelis.features.movies.presentation.screens
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -9,7 +10,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -40,7 +46,25 @@ fun MoviesListScreen(
         viewModel.loadMovies()
     }
 
-    Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
+        floatingActionButton = {
+            // Solo mostrar FAB si el usuario puede agregar películas al catálogo (ADMIN)
+            if (uiState.canAddMoviesToCatalog) {
+                FloatingActionButton(
+                    onClick = onAddMovieClick,
+                    shape = CircleShape,
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = "Agregar película"
+                    )
+                }
+            }
+        }
+    ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -70,12 +94,22 @@ fun MoviesListScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             if (uiState.isLoading) {
-                Column(
+                Box(
                     modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
+                    contentAlignment = Alignment.Center
                 ) {
                     CircularProgressIndicator()
+                }
+            } else if (uiState.movies.isEmpty()) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "No hay películas disponibles",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
             } else {
                 LazyColumn(
@@ -85,8 +119,11 @@ fun MoviesListScreen(
                     items(uiState.movies, key = { it.id }) { movie ->
                         MovieListItemCard(
                             movie = movie,
-                            modifier = Modifier
-                                .padding(horizontal = 20.dp)
+                            canMarkAsFavorite = uiState.canMarkAsFavorite,
+                            canMarkAsWatched = uiState.canMarkAsWatched,
+                            canAddToList = uiState.canAddToPersonalLists,
+                            onMovieClick = { onMovieClick(movie.id) },
+                            modifier = Modifier.padding(horizontal = 20.dp)
                         )
                     }
                 }

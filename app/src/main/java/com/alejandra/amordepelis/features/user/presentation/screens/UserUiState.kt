@@ -3,6 +3,7 @@ package com.alejandra.amordepelis.features.user.presentation.screens
 data class UserProfileUiState(
     val screenTitle: String = "Ajustes",
     val isLoading: Boolean = false,
+    val id: String = "",
     val username: String = "",
     val email: String = "",
     val passwordMasked: String = "",
@@ -10,7 +11,10 @@ data class UserProfileUiState(
     val partnerUsername: String = "",
     val partnerEmail: String = "",
     val error: String? = null,
-    val message: String? = null
+    val message: String? = null,
+    val isEditing: Boolean = false,
+    val showDeleteDialog: Boolean = false,
+    val isDeleting: Boolean = false
 )
 
 data class PartnerSearchResultUiModel(

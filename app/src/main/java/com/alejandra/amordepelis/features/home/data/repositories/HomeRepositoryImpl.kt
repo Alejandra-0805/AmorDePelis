@@ -25,4 +25,8 @@ class HomeRepositoryImpl @Inject constructor(
     override suspend fun getAnnouncements(): List<Announcement> {
         return api.getAnnouncements().toAnnouncementDomainList()
     }
+
+    override suspend fun getLatestNews(): Announcement {
+        return api.getLatestNews().toDomain()
+    }
 }

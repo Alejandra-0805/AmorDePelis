@@ -8,4 +8,6 @@ interface UserRepository {
     suspend fun getUserProfile(): UserProfile
     suspend fun searchUsersByUsername(username: String): List<UserSearchResult>
     suspend fun sendPartnerInvitation(invitation: PartnerInvitation)
+    suspend fun updateUserProfile(id: String, username: String)
+    suspend fun deleteUser(id: String)
 }

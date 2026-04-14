@@ -9,6 +9,8 @@ data class HomeUiState(
     val averageRating: Double = 0.0,
     val lists: Int = 0,
     val recentMovies: List<RecentMovieUiModel> = emptyList(),
+    val latestNews: AnnouncementUiModel? = null,
+    val showAddFirstMovieButton: Boolean = true,
     val addFirstMovieButtonLabel: String = "Agregar primera película",
     val isLoading: Boolean = false,
     val message: String? = null,

@@ -8,4 +8,5 @@ interface HomeRepository {
     suspend fun getMetrics(): Metrics
     suspend fun getRecentMovies(): List<Movie>
     suspend fun getAnnouncements(): List<Announcement>
+    suspend fun getLatestNews(): Announcement
 }

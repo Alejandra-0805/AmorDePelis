@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.alejandra.amordepelis.core.navigation.FeatureNavGraph
 import com.alejandra.amordepelis.core.navigation.NavigationWrapper
+import com.alejandra.amordepelis.core.storage.SessionManager
 import com.alejandra.amordepelis.core.ui.theme.AppTheme
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -23,12 +24,18 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var navGraphs: Set<@JvmSuppressWildcards FeatureNavGraph>
 
+    @Inject
+    lateinit var sessionManager: SessionManager
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             AppTheme {
-                NavigationWrapper(navGraphs = navGraphs)
+                NavigationWrapper(
+                    navGraphs = navGraphs,
+                    sessionManager = sessionManager
+                )
             }
         }
     }

@@ -71,6 +71,7 @@ class UserViewModel @Inject constructor(
                     _profileUiState.update {
                         it.copy(
                             isLoading = false,
+                            id = profile.id,
                             username = profile.username,
                             email = profile.email,
                             passwordMasked = profile.passwordMasked,
@@ -159,10 +160,57 @@ class UserViewModel @Inject constructor(
     }
 
     fun clearProfileMessage() {
-        _profileUiState.update { it.copy(message = null) }
+        _profileUiState.update { it.copy(message = null, error = null) }
     }
 
     fun clearPartnerSearchMessage() {
         _partnerSearchUiState.update { it.copy(message = null) }
+    }
+
+    fun toggleEditMode() {
+        _profileUiState.update { it.copy(isEditing = !it.isEditing) }
+    }
+
+    fun updateUsername(newUsername: String) {
+        _profileUiState.update { it.copy(username = newUsername) }
+    }
+
+    fun saveProfile() {
+        val currentState = _profileUiState.value
+        if (currentState.username.isBlank()) {
+            _profileUiState.update { it.copy(error = "El nombre de usuario no puede estar vacío") }
+            return
+        }
+        
+        viewModelScope.launch {
+            _profileUiState.update { it.copy(isLoading = true, error = null) }
+            runCatching { useCases.updateUserProfile(currentState.id, currentState.username) }
+                .onSuccess {
+                    _profileUiState.update { it.copy(isEditing = false, message = "Perfil actualizado") }
+                    loadUserProfile() // Reload context if necessary
+                }
+                .onFailure { throwable ->
+                    _profileUiState.update { it.copy(isLoading = false, error = throwable.message ?: "Error al actualizar perfil") }
+                }
+        }
+    }
+
+    fun showDeleteDialog(show: Boolean) {
+        _profileUiState.update { it.copy(showDeleteDialog = show) }
+    }
+
+    fun deleteProfile() {
+        val currentState = _profileUiState.value
+        viewModelScope.launch {
+            _profileUiState.update { it.copy(isDeleting = true, error = null) }
+            runCatching { useCases.deleteUser(currentState.id) }
+                .onSuccess {
+                    _profileUiState.update { it.copy(isDeleting = false, showDeleteDialog = false, message = "Perfil eliminado correctamente") }
+                    // Here we ideally notify UI to log out
+                }
+                .onFailure { throwable ->
+                    _profileUiState.update { it.copy(isDeleting = false, showDeleteDialog = false, error = throwable.message ?: "Error al eliminar perfil") }
+                }
+        }
     }
 }

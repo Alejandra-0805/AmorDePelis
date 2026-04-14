@@ -2,6 +2,8 @@ package com.alejandra.amordepelis.features.home.presentation.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.alejandra.amordepelis.core.storage.SessionManager
+import com.alejandra.amordepelis.core.storage.UserRole
 import com.alejandra.amordepelis.features.home.domain.usecases.HomeUseCases
 import com.alejandra.amordepelis.features.home.presentation.screens.AnnouncementUiModel
 import com.alejandra.amordepelis.features.home.presentation.screens.HomeUiState
@@ -16,7 +18,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val homeUseCases: HomeUseCases
+    private val homeUseCases: HomeUseCases,
+    private val sessionManager: SessionManager
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(HomeUiState())
@@ -38,6 +41,11 @@ class HomeViewModel @Inject constructor(
     val currentAnnouncementIndex: StateFlow<Int> = _currentAnnouncementIndex.asStateFlow()
 
     init {
+        viewModelScope.launch {
+            sessionManager.currentRole.collect { role ->
+                _uiState.update { it.copy(showAddFirstMovieButton = role != UserRole.PAREJA) }
+            }
+        }
         loadHome()
     }
 
@@ -50,6 +58,7 @@ class HomeViewModel @Inject constructor(
                 val metrics = homeUseCases.getMetrics()
                 val recentMovies = homeUseCases.getRecentMovies()
                 val announcements = homeUseCases.getAnnouncements()
+                val latestNews = homeUseCases.getLatestNews()
 
                 _uiState.update {
                     it.copy(
@@ -68,6 +77,12 @@ class HomeViewModel @Inject constructor(
                                 genre = movie.genre
                             )
                         },
+                        latestNews = AnnouncementUiModel(
+                            id = latestNews.id,
+                            title = latestNews.title,
+                            description = latestNews.description,
+                            imageUrl = latestNews.imageUrl
+                        ),
                         isLoading = false
                     )
                 }

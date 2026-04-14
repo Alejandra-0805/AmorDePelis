@@ -3,6 +3,7 @@ package com.alejandra.amordepelis.features.auth.presentation.viewmodels
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.alejandra.amordepelis.core.storage.SessionManager
 import com.alejandra.amordepelis.features.auth.data.datasources.remote.model.LoginRequest
 import com.alejandra.amordepelis.features.auth.data.datasources.remote.model.RegisterRequest
 import com.alejandra.amordepelis.features.auth.domain.usecases.AuthUseCases
@@ -16,7 +17,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class AuthViewModel @Inject constructor(
-    private val authUseCases: AuthUseCases
+    private val authUseCases: AuthUseCases,
+    private val sessionManager: SessionManager
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(AuthUiState())
     val uiState = _uiState.asStateFlow()
@@ -64,8 +66,9 @@ class AuthViewModel @Inject constructor(
 
             result.fold(
                 onSuccess = { response ->
-                    authUseCases.saveToken(response.token)
-                    Log.d("AuthViewModel", "Token saved successfully")
+                    // Guardar token y rol usando SessionManager
+                    sessionManager.saveSession(response.token, response.role)
+                    Log.d("AuthViewModel", "Session saved with role: ${response.role}")
 
                     _uiState.update { currentState ->
                         currentState.copy(
@@ -126,8 +129,9 @@ class AuthViewModel @Inject constructor(
 
         loginResult.fold(
             onSuccess = { response ->
-                authUseCases.saveToken(response.token)
-                Log.d("AuthViewModel", "Token saved after auto-login")
+                // Guardar token y rol usando SessionManager
+                sessionManager.saveSession(response.token, response.role)
+                Log.d("AuthViewModel", "Session saved after auto-login with role: ${response.role}")
 
                 _uiState.update { currentState ->
                     currentState.copy(
@@ -146,6 +150,13 @@ class AuthViewModel @Inject constructor(
                 }
             }
         )
+    }
+
+    fun logout() {
+        viewModelScope.launch {
+            sessionManager.logout()
+            clearState()
+        }
     }
 
     fun clearState() {

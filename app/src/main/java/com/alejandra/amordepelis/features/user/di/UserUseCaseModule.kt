@@ -4,6 +4,8 @@ import com.alejandra.amordepelis.features.user.domain.repositories.UserRepositor
 import com.alejandra.amordepelis.features.user.domain.usecases.GetUserProfileUseCase
 import com.alejandra.amordepelis.features.user.domain.usecases.SearchUsersByUsernameUseCase
 import com.alejandra.amordepelis.features.user.domain.usecases.SendPartnerInvitationUseCase
+import com.alejandra.amordepelis.features.user.domain.usecases.UpdateUserProfileUseCase
+import com.alejandra.amordepelis.features.user.domain.usecases.DeleteUserUseCase
 import com.alejandra.amordepelis.features.user.domain.usecases.UserUseCases
 import dagger.Module
 import dagger.Provides
@@ -35,15 +37,31 @@ object UserUseCaseModule {
 
     @Provides
     @Singleton
+    fun provideUpdateUserProfileUseCase(repository: UserRepository): UpdateUserProfileUseCase {
+        return UpdateUserProfileUseCase(repository)
+    }
+
+    @Provides
+    @Singleton
+    fun provideDeleteUserUseCase(repository: UserRepository): DeleteUserUseCase {
+        return DeleteUserUseCase(repository)
+    }
+
+    @Provides
+    @Singleton
     fun provideUserUseCases(
         getUserProfileUseCase: GetUserProfileUseCase,
         searchUsersByUsernameUseCase: SearchUsersByUsernameUseCase,
-        sendPartnerInvitationUseCase: SendPartnerInvitationUseCase
+        sendPartnerInvitationUseCase: SendPartnerInvitationUseCase,
+        updateUserProfileUseCase: UpdateUserProfileUseCase,
+        deleteUserUseCase: DeleteUserUseCase
     ): UserUseCases {
         return UserUseCases(
             getUserProfile = getUserProfileUseCase,
             searchUsersByUsername = searchUsersByUsernameUseCase,
-            sendPartnerInvitation = sendPartnerInvitationUseCase
+            sendPartnerInvitation = sendPartnerInvitationUseCase,
+            updateUserProfile = updateUserProfileUseCase,
+            deleteUser = deleteUserUseCase
         )
     }
 }
