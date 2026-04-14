@@ -11,7 +11,7 @@ class LoginUseCase @Inject constructor(
     suspend operator fun invoke(request: LoginRequest): Result<LoginResponse> {
         return try {
             val response = authRepository.login(request)
-            if (response.message.isNotEmpty()) {
+            if (response.role.isNotEmpty()) {
                 Result.success(response)
             } else {
                 Result.failure(Exception("No se pudo iniciar sesión"))

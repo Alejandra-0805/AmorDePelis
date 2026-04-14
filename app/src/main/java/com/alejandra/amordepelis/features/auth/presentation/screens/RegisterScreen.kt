@@ -32,6 +32,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -55,7 +56,7 @@ import com.alejandra.amordepelis.core.ui.theme.CoupleIconTint
 import com.alejandra.amordepelis.core.ui.theme.GradientBlueEnd
 import com.alejandra.amordepelis.core.ui.theme.GradientCyan
 import com.alejandra.amordepelis.core.ui.theme.GradientPurpleStart
-import com.alejandra.amordepelis.features.auth.data.datasources.remote.model.LoginRequest
+import com.alejandra.amordepelis.features.auth.data.datasources.remote.model.RegisterRequest
 import com.alejandra.amordepelis.features.auth.presentation.viewmodels.AuthViewModel
 
 @Composable
@@ -69,6 +70,8 @@ fun RegisterScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val email by viewModel.email.collectAsStateWithLifecycle()
     val password by viewModel.password.collectAsStateWithLifecycle()
+    val username by viewModel.username.collectAsStateWithLifecycle()
+    val role by viewModel.role.collectAsStateWithLifecycle()
     
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -99,9 +102,21 @@ fun RegisterScreen(
             uiState = uiState,
             email = email,
             password = password,
+            username = username,
             onEmailChange = viewModel::onEmailChange,
             onPasswordChange = viewModel::onPasswordChange,
-            onRegisterClick = { viewModel.register(LoginRequest(email = email, password = password)) },
+            onUsernameChange = viewModel::onUsernameChange,
+            onRegisterClick = {
+                viewModel.register(
+                    RegisterRequest(
+                        email = email,
+                        passwordRaw = password,
+                        role = role,
+                        username = username
+                    )
+                )
+            },
+            onNavigateToLogin = onNavigateToLogin,
             modifier = Modifier.padding(paddingValues)
         )
     }
@@ -112,9 +127,12 @@ private fun RegisterScreenContent(
     uiState: AuthUiState,
     email: String,
     password: String,
+    username: String,
     onEmailChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,
+    onUsernameChange: (String) -> Unit,
     onRegisterClick: () -> Unit,
+    onNavigateToLogin: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val backgroundGradient = Brush.verticalGradient(
@@ -134,6 +152,7 @@ private fun RegisterScreenContent(
 
     val isButtonEnabled = email.isNotBlank() && 
                           password.isNotBlank() && 
+                          username.isNotBlank() &&
                           !uiState.isLoading
 
     Box(
@@ -214,7 +233,7 @@ private fun RegisterScreenContent(
                         )
                         Spacer(modifier = Modifier.size(8.dp))
                         Text(
-                            text = "Bienvenidos",
+                            text = "Crear cuenta",
                             style = MaterialTheme.typography.headlineSmall.copy(
                                 fontWeight = FontWeight.Bold
                             ),
@@ -223,6 +242,37 @@ private fun RegisterScreenContent(
                     }
 
                     Spacer(modifier = Modifier.height(24.dp))
+
+                    Text(
+                        text = "Nombre de usuario",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    OutlinedTextField(
+                        value = username,
+                        onValueChange = onUsernameChange,
+                        placeholder = {
+                            Text(
+                                text = "Tu nombre de usuario",
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                        enabled = !uiState.isLoading,
+                        shape = RoundedCornerShape(12.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = MaterialTheme.colorScheme.primary,
+                            unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                            focusedContainerColor = MaterialTheme.colorScheme.surface,
+                            unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                            cursorColor = MaterialTheme.colorScheme.primary
+                        )
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
 
                     Text(
                         text = "Correo electrónico",
@@ -353,6 +403,29 @@ private fun RegisterScreenContent(
                             }
                         }
                     }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "¿Ya tienes cuenta?",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        TextButton(onClick = onNavigateToLogin) {
+                            Text(
+                                text = "Iniciar sesión",
+                                style = MaterialTheme.typography.bodyMedium.copy(
+                                    fontWeight = FontWeight.Bold
+                                ),
+                                color = CoupleIconTint
+                            )
+                        }
+                    }
                 }
             }
 
@@ -369,9 +442,12 @@ private fun RegisterScreenPreview() {
             uiState = AuthUiState(),
             email = "",
             password = "",
+            username = "",
             onEmailChange = {},
             onPasswordChange = {},
-            onRegisterClick = {}
+            onUsernameChange = {},
+            onRegisterClick = {},
+            onNavigateToLogin = {}
         )
     }
 }

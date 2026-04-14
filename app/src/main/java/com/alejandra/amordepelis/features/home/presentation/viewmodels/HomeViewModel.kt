@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.alejandra.amordepelis.features.home.domain.usecases.HomeUseCases
 import com.alejandra.amordepelis.features.home.presentation.screens.AnnouncementUiModel
-import com.alejandra.amordepelis.features.home.presentation.screens.HomeBottomTab
 import com.alejandra.amordepelis.features.home.presentation.screens.HomeUiState
 import com.alejandra.amordepelis.features.home.presentation.screens.RecentMovieUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -31,9 +30,6 @@ class HomeViewModel @Inject constructor(
 
     private val _message = MutableStateFlow<String?>(null)
     val message: StateFlow<String?> = _message.asStateFlow()
-
-    private val _selectedBottomTab = MutableStateFlow(HomeBottomTab.Home)
-    val selectedBottomTab: StateFlow<HomeBottomTab> = _selectedBottomTab.asStateFlow()
 
     private val _announcements = MutableStateFlow<List<AnnouncementUiModel>>(emptyList())
     val announcements: StateFlow<List<AnnouncementUiModel>> = _announcements.asStateFlow()
@@ -92,11 +88,6 @@ class HomeViewModel @Inject constructor(
                 _uiState.update { it.copy(isLoading = false, error = _error.value) }
             }
         }
-    }
-
-    fun onBottomTabSelected(tab: HomeBottomTab) {
-        _selectedBottomTab.value = tab
-        _uiState.update { it.copy(selectedBottomTab = tab) }
     }
 
     fun onAddFirstMovieClick() {

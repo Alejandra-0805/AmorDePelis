@@ -32,6 +32,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -100,7 +101,8 @@ fun LoginScreen(
             password = password,
             onEmailChange = viewModel::onEmailChange,
             onPasswordChange = viewModel::onPasswordChange,
-            onLoginClick = { viewModel.login(LoginRequest(email = email, password = password)) },
+            onLoginClick = { viewModel.login(LoginRequest(email = email, passwordRaw = password)) },
+            onNavigateToRegister = onNavigateToRegister,
             modifier = Modifier.padding(paddingValues)
         )
     }
@@ -114,8 +116,9 @@ private fun LoginScreenContent(
     onEmailChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,
     onLoginClick: () -> Unit,
+    onNavigateToRegister: () -> Unit,
     modifier: Modifier = Modifier
-) {
+){
     val backgroundGradient = Brush.verticalGradient(
         colors = listOf(
             GradientPurpleStart,
@@ -352,6 +355,29 @@ private fun LoginScreenContent(
                             }
                         }
                     }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "¿No tienes cuenta?",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        TextButton(onClick = onNavigateToRegister) {
+                            Text(
+                                text = "Regístrate",
+                                style = MaterialTheme.typography.bodyMedium.copy(
+                                    fontWeight = FontWeight.Bold
+                                ),
+                                color = CoupleIconTint
+                            )
+                        }
+                    }
                 }
             }
 
@@ -370,7 +396,8 @@ private fun LoginScreenPreview() {
             password = "",
             onEmailChange = {},
             onPasswordChange = {},
-            onLoginClick = {}
+            onLoginClick = {},
+            onNavigateToRegister = {}
         )
     }
 }

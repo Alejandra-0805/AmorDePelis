@@ -5,7 +5,7 @@ import com.alejandra.amordepelis.features.auth.domain.entities.LoginResponse
 
 fun LoginResponseDto.loginToDomain(): LoginResponse {
     return LoginResponse(
-        message = this.message,
+        role = this.role,
         token = this.token
     )
 }
