@@ -1,13 +1,17 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.secrets.gradle)
+    alias(libs.plugins.kotlin.serialization)
+
+    // Activa Hilt y KSP
+    alias(libs.plugins.devtools.ksp)
+    alias(libs.plugins.hilt.android)
 }
 
 android {
     namespace = "com.alejandra.amordepelis"
-    compileSdk {
-        version = release(36)
-    }
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.alejandra.amordepelis"
@@ -37,15 +41,50 @@ android {
     }
 }
 
+secrets {
+    // Archivo de donde se leen los secretos (por defecto local.properties)
+    propertiesFileName = "local.properties"
+
+    // Archivo de valores por defecto (opcional, para CI/CD)
+    defaultPropertiesFileName = "local.defaults.properties"
+
+    // Ignorar claves que no existen
+    ignoreList.add("sdk.*")
+}
+
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.material.icons.extended)
+    implementation(libs.androidx.compose.ui.text.google.fonts)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)       // viewModel()
+    implementation(libs.io.coil.kt.coil.compose)
+
+    // Navigation & Serialization
+    implementation(libs.androidx.navigation.compose)
+    implementation(libs.kotlinx.serialization.json)
+
+    // Retrofit & OkHttp
+    implementation(libs.retrofit.core)
+    implementation(libs.retrofit.gson)
+    // Lifecycle ViewModel Compose
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+
+    // DataStore
+    implementation(libs.androidx.datastore.preferences)
+    // Hilt
+    implementation(libs.hilt.android)
+    implementation(libs.hilt.navigation.compose)
+    implementation(libs.androidx.datastore.core)
+    ksp(libs.hilt.compiler)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
