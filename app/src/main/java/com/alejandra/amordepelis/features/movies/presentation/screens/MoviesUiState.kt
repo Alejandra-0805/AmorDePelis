@@ -6,7 +6,12 @@ data class MoviesListUiState(
     val title: String = "Peliculas",
     val isLoading: Boolean = false,
     val movies: List<Movie> = emptyList(),
-    val error: String? = null
+    val error: String? = null,
+    // Permisos basados en rol
+    val canAddMoviesToCatalog: Boolean = false,
+    val canAddToPersonalLists: Boolean = false,
+    val canMarkAsWatched: Boolean = false,
+    val canMarkAsFavorite: Boolean = false
 )
 
 data class MovieDetailsUiState(

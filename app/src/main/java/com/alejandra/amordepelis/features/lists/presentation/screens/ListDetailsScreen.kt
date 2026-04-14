@@ -122,31 +122,11 @@ fun ListDetailsScreen(
                                         text = movie.title,
                                         style = MaterialTheme.typography.headlineSmall
                                     )
-                                    androidx.compose.foundation.layout.Row {
-                                        Icon(
-                                            imageVector = Icons.Default.Star,
-                                            contentDescription = null,
-                                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                        )
+                                    if (movie.tags.isNotEmpty()) {
                                         Text(
-                                            text = " ${movie.rating}",
-                                            style = MaterialTheme.typography.titleMedium,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                                        )
-                                        Text(
-                                            text = "  |  ",
-                                            style = MaterialTheme.typography.titleMedium,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                                        )
-                                        Icon(
-                                            imageVector = Icons.Default.AccessTime,
-                                            contentDescription = null,
-                                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                        )
-                                        Text(
-                                            text = " ${movie.durationMinutes}m",
-                                            style = MaterialTheme.typography.titleMedium,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                            text = movie.tags.joinToString(" · "),
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            color = MaterialTheme.colorScheme.primary
                                         )
                                     }
                                 }
@@ -167,20 +147,12 @@ private fun ListDetailsScreenPreview() {
             Movie(
                 id = "1",
                 title = "Titanic",
-                synopsis = "",
-                genre = "Romance",
-                durationMinutes = 127,
-                rating = 4,
-                isFavorite = false
+                tags = listOf("Romance", "Drama")
             ),
             Movie(
                 id = "2",
                 title = "Yo antes de ti",
-                synopsis = "",
-                genre = "Romance",
-                durationMinutes = 127,
-                rating = 4,
-                isFavorite = false
+                tags = listOf("Romance")
             )
         )
 

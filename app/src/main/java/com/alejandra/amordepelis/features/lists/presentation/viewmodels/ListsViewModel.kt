@@ -2,6 +2,7 @@ package com.alejandra.amordepelis.features.lists.presentation.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.alejandra.amordepelis.core.storage.SessionManager
 import com.alejandra.amordepelis.features.lists.domain.entities.CreateListParams
 import com.alejandra.amordepelis.features.lists.domain.entities.UpdateListParams
 import com.alejandra.amordepelis.features.lists.domain.usecases.ListsUseCases
@@ -22,7 +23,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ListsViewModel @Inject constructor(
-    private val useCases: ListsUseCases
+    private val useCases: ListsUseCases,
+    private val sessionManager: SessionManager
 ) : ViewModel() {
 
     private val _listsUiState = MutableStateFlow(ListsScreenUiState())
@@ -54,6 +56,27 @@ class ListsViewModel @Inject constructor(
 
     private val _currentAnnouncementIndex = MutableStateFlow(0)
     val currentAnnouncementIndex: StateFlow<Int> = _currentAnnouncementIndex.asStateFlow()
+
+    init {
+        updatePermissions()
+    }
+
+    private fun updatePermissions() {
+        viewModelScope.launch {
+            sessionManager.currentRole.collect { role ->
+                _listsUiState.update { 
+                    it.copy(
+                        canCreateLists = role.canCreateLists(),
+                        canEditLists = role.canCreateLists(),
+                        canDeleteLists = role.canCreateLists()
+                    )
+                }
+            }
+        }
+    }
+
+    // Funciones de permisos para la UI
+    fun canCreateLists(): Boolean = sessionManager.canCreateLists()
 
     fun loadSharedLists() {
         viewModelScope.launch {
@@ -139,6 +162,12 @@ class ListsViewModel @Inject constructor(
     }
 
     fun createList() {
+        // Verificar permiso antes de crear
+        if (!sessionManager.canCreateLists()) {
+            _addListUiState.update { it.copy(error = "No tienes permiso para crear listas") }
+            return
+        }
+
         val state = _addListUiState.value
         if (state.name.isBlank()) {
             _addListUiState.update { it.copy(error = "El nombre de la lista es obligatorio") }

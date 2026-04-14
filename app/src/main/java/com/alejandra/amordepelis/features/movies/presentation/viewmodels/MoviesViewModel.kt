@@ -2,6 +2,8 @@ package com.alejandra.amordepelis.features.movies.presentation.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.alejandra.amordepelis.core.storage.SessionManager
+import com.alejandra.amordepelis.core.storage.UserRole
 import com.alejandra.amordepelis.features.movies.domain.entities.AddMovieParams
 import com.alejandra.amordepelis.features.movies.domain.usecases.MoviesUseCases
 import com.alejandra.amordepelis.features.movies.presentation.screens.AddMovieUiState
@@ -18,7 +20,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MoviesViewModel @Inject constructor(
-    private val useCases: MoviesUseCases
+    private val useCases: MoviesUseCases,
+    private val sessionManager: SessionManager
 ) : ViewModel() {
 
     private val _listUiState = MutableStateFlow(MoviesListUiState())
@@ -36,8 +39,27 @@ class MoviesViewModel @Inject constructor(
     private val _currentAnnouncementIndex = MutableStateFlow(0)
     val currentAnnouncementIndex: StateFlow<Int> = _currentAnnouncementIndex.asStateFlow()
 
+    // Permisos basados en rol
+    val currentRole: StateFlow<UserRole> = sessionManager.currentRole
+
     init {
         loadAnnouncements()
+        updatePermissions()
+    }
+
+    private fun updatePermissions() {
+        viewModelScope.launch {
+            sessionManager.currentRole.collect { role ->
+                _listUiState.update { 
+                    it.copy(
+                        canAddMoviesToCatalog = role.canAddMoviesToCatalog(),
+                        canAddToPersonalLists = role.canAddMoviesToPersonalLists(),
+                        canMarkAsWatched = role.canMarkMoviesAsWatched(),
+                        canMarkAsFavorite = role.canMarkMoviesAsFavorite()
+                    )
+                }
+            }
+        }
     }
 
     private fun loadAnnouncements() {
@@ -97,6 +119,12 @@ class MoviesViewModel @Inject constructor(
         }
     }
 
+    // Funciones de permisos para la UI
+    fun canAddMoviesToCatalog(): Boolean = sessionManager.canAddMoviesToCatalog()
+    fun canAddToPersonalLists(): Boolean = sessionManager.canAddMoviesToPersonalLists()
+    fun canMarkAsWatched(): Boolean = sessionManager.canMarkMoviesAsWatched()
+    fun canMarkAsFavorite(): Boolean = sessionManager.canMarkMoviesAsFavorite()
+
     fun onTitleChange(value: String) {
         _addUiState.update { it.copy(movieTitle = value, error = null) }
     }
@@ -122,9 +150,15 @@ class MoviesViewModel @Inject constructor(
     }
 
     fun addMovie() {
+        // Verificar permiso antes de agregar
+        if (!sessionManager.canAddMoviesToCatalog()) {
+            _addUiState.update { it.copy(error = "No tienes permiso para agregar películas al catálogo") }
+            return
+        }
+
         val state = _addUiState.value
         if (state.movieTitle.isBlank()) {
-            _addUiState.update { it.copy(error = "Movie title is required") }
+            _addUiState.update { it.copy(error = "El título de la película es requerido") }
             return
         }
 
@@ -158,7 +192,7 @@ class MoviesViewModel @Inject constructor(
                 }
             }.onFailure { throwable ->
                 _addUiState.update {
-                    it.copy(isLoading = false, error = throwable.message ?: "Error saving movie")
+                    it.copy(isLoading = false, error = throwable.message ?: "Error al guardar película")
                 }
             }
         }

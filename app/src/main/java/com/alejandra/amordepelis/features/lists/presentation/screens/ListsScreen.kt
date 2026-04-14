@@ -18,9 +18,12 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
@@ -96,8 +99,19 @@ fun ListsScreen(
         modifier = Modifier.fillMaxSize(),
         snackbarHost = { SnackbarHost(snackbarHostState) },
         floatingActionButton = {
-            FloatingActionButton(onClick = onAddNewListClick) {
-                Text("+")
+            // Solo mostrar FAB si el usuario puede crear listas (PAREJA)
+            if (uiState.canCreateLists) {
+                FloatingActionButton(
+                    onClick = onAddNewListClick,
+                    shape = CircleShape,
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = "Crear nueva lista"
+                    )
+                }
             }
         }
     ) { innerPadding ->
@@ -139,11 +153,35 @@ fun ListsScreen(
                 }
             }
 
+            if (uiState.lists.isEmpty() && !uiState.isLoading) {
+                item {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(32.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = if (uiState.canCreateLists) 
+                                "No tienes listas aún. ¡Crea una nueva!" 
+                            else 
+                                "No hay listas disponibles",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
+            }
+
             items(uiState.lists, key = { it.id }) { item ->
                 SharedListCard(
                     item = item,
+                    canEdit = uiState.canEditLists,
+                    canDelete = uiState.canDeleteLists,
                     onEditClick = { viewModel.openEditModal(item) },
                     onDeleteClick = { viewModel.openDeleteModal(item) },
+                    onClick = { onListClick(item.id) },
                     modifier = Modifier
                         .padding(horizontal = 20.dp)
                         .padding(bottom = 12.dp)
@@ -305,7 +343,10 @@ private fun ListsScreenPreview() {
                     movieCount = 0,
                     colorHex = "#EF4444"
                 )
-            )
+            ),
+            canCreateLists = true,
+            canEditLists = true,
+            canDeleteLists = true
         )
 
         Column {
@@ -317,6 +358,8 @@ private fun ListsScreenPreview() {
                 state.lists.forEach { item ->
                     SharedListCard(
                         item = item,
+                        canEdit = true,
+                        canDelete = true,
                         onEditClick = {},
                         onDeleteClick = {}
                     )

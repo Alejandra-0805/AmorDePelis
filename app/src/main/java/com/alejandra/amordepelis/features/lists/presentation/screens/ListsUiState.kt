@@ -23,7 +23,11 @@ data class ListsScreenUiState(
     val lists: List<SharedListItemUiModel> = emptyList(),
     val isLoading: Boolean = false,
     val error: String? = null,
-    val message: String? = null
+    val message: String? = null,
+    // Permisos basados en rol
+    val canCreateLists: Boolean = false,
+    val canEditLists: Boolean = false,
+    val canDeleteLists: Boolean = false
 )
 
 data class AddListUiState(

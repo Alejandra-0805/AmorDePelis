@@ -1,5 +1,6 @@
 package com.alejandra.amordepelis.features.lists.presentation.components
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -27,13 +28,19 @@ import com.alejandra.amordepelis.features.lists.presentation.screens.SharedListI
 @Composable
 fun SharedListCard(
     item: SharedListItemUiModel,
-    onEditClick: () -> Unit,
-    onDeleteClick: () -> Unit,
+    canEdit: Boolean = true,
+    canDelete: Boolean = true,
+    onEditClick: () -> Unit = {},
+    onDeleteClick: () -> Unit = {},
+    onClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Card(
-        modifier = modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable { onClick() },
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Row(
             modifier = Modifier
@@ -70,20 +77,27 @@ fun SharedListCard(
                 }
             }
 
-            Row {
-                IconButton(onClick = onEditClick) {
-                    Icon(
-                        imageVector = Icons.Default.Edit,
-                        contentDescription = "Editar lista",
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                }
-                IconButton(onClick = onDeleteClick) {
-                    Icon(
-                        imageVector = Icons.Default.Delete,
-                        contentDescription = "Eliminar lista",
-                        tint = MaterialTheme.colorScheme.error
-                    )
+            // Solo mostrar botones si el usuario tiene permisos (PAREJA)
+            if (canEdit || canDelete) {
+                Row {
+                    if (canEdit) {
+                        IconButton(onClick = onEditClick) {
+                            Icon(
+                                imageVector = Icons.Default.Edit,
+                                contentDescription = "Editar lista",
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
+                    if (canDelete) {
+                        IconButton(onClick = onDeleteClick) {
+                            Icon(
+                                imageVector = Icons.Default.Delete,
+                                contentDescription = "Eliminar lista",
+                                tint = MaterialTheme.colorScheme.error
+                            )
+                        }
+                    }
                 }
             }
         }

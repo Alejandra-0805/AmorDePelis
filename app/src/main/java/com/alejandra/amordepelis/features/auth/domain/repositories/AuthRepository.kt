@@ -9,4 +9,6 @@ interface AuthRepository {
     suspend fun register(request: RegisterRequest): RegisterResponse
 
     suspend fun login(request: LoginRequest): LoginResponse
+    
+    suspend fun createRoom(roomName: String)
 }

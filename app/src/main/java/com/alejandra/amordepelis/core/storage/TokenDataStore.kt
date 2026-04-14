@@ -22,10 +22,16 @@ class TokenDataStore @Inject constructor(
 
     companion object {
         private val TOKEN_KEY = stringPreferencesKey("auth_token")
+        private val ROLE_KEY = stringPreferencesKey("user_role")
     }
 
     val tokenFlow: Flow<String?> = context.dataStore.data.map { preferences ->
         preferences[TOKEN_KEY]
+    }
+
+    val roleFlow: Flow<UserRole> = context.dataStore.data.map { preferences ->
+        val roleString = preferences[ROLE_KEY] ?: UserRole.PAREJA.value
+        UserRole.fromString(roleString)
     }
 
     suspend fun saveToken(token: String) {
@@ -34,8 +40,33 @@ class TokenDataStore @Inject constructor(
         }
     }
 
+    suspend fun saveRole(role: String) {
+        context.dataStore.edit { preferences ->
+            preferences[ROLE_KEY] = role
+        }
+    }
+
+    suspend fun saveSession(token: String, role: String) {
+        context.dataStore.edit { preferences ->
+            preferences[TOKEN_KEY] = token
+            preferences[ROLE_KEY] = role
+        }
+    }
+
     suspend fun getToken(): String? {
         return context.dataStore.data.first()[TOKEN_KEY]
+    }
+
+    suspend fun getRole(): UserRole {
+        val roleString = context.dataStore.data.first()[ROLE_KEY] ?: UserRole.PAREJA.value
+        return UserRole.fromString(roleString)
+    }
+
+    suspend fun clearSession() {
+        context.dataStore.edit { preferences ->
+            preferences.remove(TOKEN_KEY)
+            preferences.remove(ROLE_KEY)
+        }
     }
 
     suspend fun clearToken() {

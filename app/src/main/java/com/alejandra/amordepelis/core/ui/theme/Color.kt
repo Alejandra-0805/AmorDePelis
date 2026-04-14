@@ -218,14 +218,14 @@ val surfaceContainerHighDarkHighContrast = Color(0xFF3D3A41)
 val surfaceContainerHighestDarkHighContrast = Color(0xFF48464C)
 
 // App custom gradient colors
-val GradientPurpleStart = Color(0xFFAB47BC)
-val GradientPurpleCenter = Color(0xFF9C27B0)
-val GradientBlueEnd = Color(0xFF7C4DFF)
+val GradientPurpleStart = Color(0xFFA324FF)
+val GradientPurpleCenter = Color(0xFF7B52FF)
+val GradientBlueEnd = Color(0xFF3B82F6)
 val GradientCyan = Color(0xFF00BCD4)
 
 // Couple Registration Screen colors
 val CoupleCardBackground = Color(0xFFFFFFFF)
 val CoupleIconBackground = Color(0xFFFFFFFF)
-val CoupleIconTint = Color(0xFF9C27B0)
-val CoupleButtonGradientStart = Color(0xFF9C27B0)
-val CoupleButtonGradientEnd = Color(0xFF7C4DFF)
+val CoupleIconTint = Color(0xFFA324FF)
+val CoupleButtonGradientStart = Color(0xFF9D24FF)
+val CoupleButtonGradientEnd = Color(0xFF3B82F6)
