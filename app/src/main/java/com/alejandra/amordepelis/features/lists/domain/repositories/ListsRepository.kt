@@ -7,9 +7,9 @@ import com.alejandra.amordepelis.features.lists.domain.entities.SharedListDetail
 import com.alejandra.amordepelis.features.lists.domain.entities.UpdateListParams
 
 interface ListsRepository {
-    suspend fun getSharedLists(): List<SharedList>
+    suspend fun getSharedLists(roomId: String): List<SharedList>
     suspend fun getSharedListDetails(listId: String): SharedListDetails
-    suspend fun createSharedList(params: CreateListParams): SharedList
+    suspend fun createSharedList(roomId: String, params: CreateListParams): SharedList
     suspend fun updateSharedList(params: UpdateListParams)
     suspend fun deleteSharedList(listId: String)
     suspend fun getAnnouncements(): List<Announcement>

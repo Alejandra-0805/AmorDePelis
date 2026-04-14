@@ -15,16 +15,16 @@ import javax.inject.Inject
 class ListsRepositoryImpl @Inject constructor(
     private val api: ListsApi
 ) : ListsRepository {
-    override suspend fun getSharedLists(): List<SharedList> {
-        return api.getSharedLists().map { it.toDomain() }
+    override suspend fun getSharedLists(roomId: String): List<SharedList> {
+        return api.getListsByRoom(roomId).map { it.toDomain() }
     }
 
     override suspend fun getSharedListDetails(listId: String): SharedListDetails {
         return api.getSharedListDetails(listId).toDomain()
     }
 
-    override suspend fun createSharedList(params: CreateListParams): SharedList {
-        return api.createSharedList(params.toDto()).toDomain()
+    override suspend fun createSharedList(roomId: String, params: CreateListParams): SharedList {
+        return api.createSharedListByRoom(roomId, params.toDto()).toDomain()
     }
 
     override suspend fun updateSharedList(params: UpdateListParams) {
