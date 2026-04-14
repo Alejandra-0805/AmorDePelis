@@ -27,4 +27,10 @@ class AuthRepositoryImpl @Inject constructor(
         Log.d("AuthRepositoryImpl", "login response: $response")
         return response.loginToDomain()
     }
+
+    override suspend fun createRoom(roomName: String) {
+        val request = com.alejandra.amordepelis.features.auth.data.datasources.remote.api.CreateRoomRequestDto(roomName)
+        api.createRoom(request)
+        Log.d("AuthRepositoryImpl", "Room '$roomName' created automatically.")
+    }
 }

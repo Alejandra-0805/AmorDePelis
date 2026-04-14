@@ -56,21 +56,17 @@ fun MovieDetailScreen(
             } else {
                 uiState.movie?.let { movie ->
                     Column(modifier = Modifier.padding(horizontal = 20.dp)) {
-                        Text(
-                            text = movie.genre,
-                            style = MaterialTheme.typography.labelLarge,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
+                        if (movie.tags.isNotEmpty()) {
+                            Text(
+                                text = movie.tags.joinToString(" · "),
+                                style = MaterialTheme.typography.labelLarge,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                        }
                         Text(
                             text = movie.title,
                             style = MaterialTheme.typography.headlineLarge
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = movie.synopsis,
-                            style = MaterialTheme.typography.bodyLarge,
-                            modifier = Modifier.fillMaxWidth()
                         )
                     }
                 }

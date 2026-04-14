@@ -30,7 +30,7 @@ fun ListsHeader(
                     )
                 )
             )
-            .padding(horizontal = 20.dp, vertical = 24.dp)
+            .padding(horizontal = 20.dp, vertical = 16.dp)
     ) {
         Column {
             Text(

@@ -36,15 +36,23 @@ object AuthUseCaseModule {
 
     @Provides
     @Singleton
+    fun provideCreateAutoRoomUseCase(repository: AuthRepository): com.alejandra.amordepelis.features.auth.domain.usecases.CreateAutoRoomUseCase {
+        return com.alejandra.amordepelis.features.auth.domain.usecases.CreateAutoRoomUseCase(repository)
+    }
+
+    @Provides
+    @Singleton
     fun provideAuthUseCases(
         loginUseCase: LoginUseCase,
         registerUseCase: RegisterUseCase,
-        saveTokenUseCase: SaveTokenUseCase
+        saveTokenUseCase: SaveTokenUseCase,
+        createRoomUseCase: com.alejandra.amordepelis.features.auth.domain.usecases.CreateAutoRoomUseCase
     ): AuthUseCases {
         return AuthUseCases(
             login = loginUseCase,
             register = registerUseCase,
-            saveToken = saveTokenUseCase
+            saveToken = saveTokenUseCase,
+            createRoom = createRoomUseCase
         )
     }
 }

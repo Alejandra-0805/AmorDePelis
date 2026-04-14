@@ -152,7 +152,7 @@ private fun HomeScreenContent(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(headerGradient)
-                    .padding(horizontal = 24.dp, vertical = 32.dp)
+                    .padding(horizontal = 24.dp, vertical = 16.dp)
             ) {
                 Column {
                     Text(
@@ -166,6 +166,24 @@ private fun HomeScreenContent(
                         text = "${uiState.firstPersonName} & ${uiState.secondPersonName}",
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.82f)
+                    )
+                }
+            }
+        }
+
+        uiState.latestNews?.let { latestNews ->
+            item {
+                Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp)) {
+                    Text(
+                        text = "Última Noticia",
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    AnnouncementCard(
+                        announcement = latestNews,
+                        modifier = Modifier.fillMaxWidth()
                     )
                 }
             }
@@ -222,24 +240,26 @@ private fun HomeScreenContent(
             }
         }
 
-        item {
-            Spacer(modifier = Modifier.height(28.dp))
-            Button(
-                onClick = onAddFirstMovieClick,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 20.dp)
-                    .height(56.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary
-                ),
-                shape = RoundedCornerShape(16.dp)
-            ) {
-                Text(
-                    text = uiState.addFirstMovieButtonLabel,
-                    style = MaterialTheme.typography.titleMedium
-                )
+        if (uiState.showAddFirstMovieButton) {
+            item {
+                Spacer(modifier = Modifier.height(28.dp))
+                Button(
+                    onClick = onAddFirstMovieClick,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp)
+                        .height(56.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary
+                    ),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Text(
+                        text = uiState.addFirstMovieButtonLabel,
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                }
             }
         }
     }

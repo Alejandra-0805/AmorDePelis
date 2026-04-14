@@ -32,7 +32,7 @@ fun MoviesTopHeader(
                     )
                 )
             )
-            .padding(horizontal = 20.dp, vertical = 28.dp)
+            .padding(horizontal = 20.dp, vertical = 16.dp)
     ) {
         Column {
             Text(

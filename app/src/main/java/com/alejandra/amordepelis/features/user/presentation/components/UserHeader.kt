@@ -28,7 +28,7 @@ fun UserHeader(
                     )
                 )
             )
-            .padding(horizontal = 20.dp, vertical = 28.dp)
+            .padding(horizontal = 20.dp, vertical = 16.dp)
     ) {
         Text(
             text = title,
