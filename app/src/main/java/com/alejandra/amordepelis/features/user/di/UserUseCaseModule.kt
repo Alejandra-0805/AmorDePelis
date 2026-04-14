@@ -49,19 +49,27 @@ object UserUseCaseModule {
 
     @Provides
     @Singleton
+    fun provideJoinVirtualRoomUseCase(repository: UserRepository): com.alejandra.amordepelis.features.user.domain.usecases.JoinVirtualRoomUseCase {
+        return com.alejandra.amordepelis.features.user.domain.usecases.JoinVirtualRoomUseCase(repository)
+    }
+
+    @Provides
+    @Singleton
     fun provideUserUseCases(
         getUserProfileUseCase: GetUserProfileUseCase,
         searchUsersByUsernameUseCase: SearchUsersByUsernameUseCase,
         sendPartnerInvitationUseCase: SendPartnerInvitationUseCase,
         updateUserProfileUseCase: UpdateUserProfileUseCase,
-        deleteUserUseCase: DeleteUserUseCase
+        deleteUserUseCase: DeleteUserUseCase,
+        joinVirtualRoomUseCase: com.alejandra.amordepelis.features.user.domain.usecases.JoinVirtualRoomUseCase
     ): UserUseCases {
         return UserUseCases(
             getUserProfile = getUserProfileUseCase,
             searchUsersByUsername = searchUsersByUsernameUseCase,
             sendPartnerInvitation = sendPartnerInvitationUseCase,
             updateUserProfile = updateUserProfileUseCase,
-            deleteUser = deleteUserUseCase
+            deleteUser = deleteUserUseCase,
+            joinVirtualRoom = joinVirtualRoomUseCase
         )
     }
 }

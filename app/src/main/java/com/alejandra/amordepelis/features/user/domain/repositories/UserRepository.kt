@@ -10,4 +10,5 @@ interface UserRepository {
     suspend fun sendPartnerInvitation(invitation: PartnerInvitation)
     suspend fun updateUserProfile(id: String, username: String)
     suspend fun deleteUser(id: String)
+    suspend fun joinVirtualRoom(invitationCode: String)
 }

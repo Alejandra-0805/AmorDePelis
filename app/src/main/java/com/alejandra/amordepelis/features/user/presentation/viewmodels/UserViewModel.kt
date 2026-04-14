@@ -77,7 +77,9 @@ class UserViewModel @Inject constructor(
                             passwordMasked = profile.passwordMasked,
                             hasPartner = profile.partner != null,
                             partnerUsername = profile.partner?.username.orEmpty(),
-                            partnerEmail = profile.partner?.email.orEmpty()
+                            partnerEmail = profile.partner?.email.orEmpty(),
+                            ownInviteCode = profile.ownInviteCode.orEmpty(),
+                            roomName = profile.roomName ?: "Sin sala asignada"
                         )
                     }
                 }
@@ -211,6 +213,46 @@ class UserViewModel @Inject constructor(
                 .onFailure { throwable ->
                     _profileUiState.update { it.copy(isDeleting = false, showDeleteDialog = false, error = throwable.message ?: "Error al eliminar perfil") }
                 }
+        }
+    }
+
+    fun onInviteCodeChange(newCode: String) {
+    _profileUiState.update { it.copy(inviteCodeInput = newCode) }
+    }
+
+    fun joinRoom() {
+        val code = _profileUiState.value.inviteCodeInput.trim()
+        
+        // Validación Simple
+        if (code.isBlank() || code == _profileUiState.value.ownInviteCode) {
+            _profileUiState.update { it.copy(error = "El código ingresado es inválido o es tu propio código.") }
+            return
+        }
+
+        viewModelScope.launch {
+            _profileUiState.update { it.copy(isLoading = true, error = null) }
+            runCatching {
+                // Llama a tu UseCase respectivo configurado en Hilt
+                useCases.joinVirtualRoom(code) 
+            }.onSuccess { 
+                // Éxito: Modifica el estado global (StateFlow)
+                _profileUiState.update { 
+                    it.copy(
+                        isLoading = false,
+                        hasPartner = true, 
+                        message = "¡Pareja vinculada exitosamente!",
+                        inviteCodeInput = "" // Limpiar caja
+                    ) 
+                }
+                loadUserProfile() // Refresca los detalles del usuario
+            }.onFailure { throwable ->
+                _profileUiState.update { 
+                    it.copy(
+                        isLoading = false,
+                        error = throwable.message ?: "Parece que este código no existe o la sala ya está llena."
+                    )
+                }
+            }
         }
     }
 }

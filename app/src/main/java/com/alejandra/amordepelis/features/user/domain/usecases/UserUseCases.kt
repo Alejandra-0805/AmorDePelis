@@ -5,5 +5,6 @@ data class UserUseCases(
     val searchUsersByUsername: SearchUsersByUsernameUseCase,
     val sendPartnerInvitation: SendPartnerInvitationUseCase,
     val updateUserProfile: UpdateUserProfileUseCase,
-    val deleteUser: DeleteUserUseCase
+    val deleteUser: DeleteUserUseCase,
+    val joinVirtualRoom: JoinVirtualRoomUseCase
 )

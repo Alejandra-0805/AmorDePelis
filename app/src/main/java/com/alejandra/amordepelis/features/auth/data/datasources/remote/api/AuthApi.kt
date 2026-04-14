@@ -7,6 +7,8 @@ import com.alejandra.amordepelis.features.auth.data.datasources.remote.model.Reg
 import retrofit2.http.Body
 import retrofit2.http.POST
 
+data class CreateRoomRequestDto(val roomName: String)
+
 interface AuthApi {
     @POST("users/register")
     suspend fun register(
@@ -17,4 +19,9 @@ interface AuthApi {
     suspend fun login(
         @Body request: LoginRequest
     ): LoginResponseDto
+
+    @POST("rooms")
+    suspend fun createRoom(
+        @Body request: CreateRoomRequestDto
+    )
 }

@@ -17,7 +17,8 @@ import javax.inject.Singleton
  */
 @Singleton
 class SessionManager @Inject constructor(
-    private val tokenDataStore: TokenDataStore
+    private val tokenDataStore: TokenDataStore,
+    private val tokenProvider: TokenProvider
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
@@ -46,6 +47,7 @@ class SessionManager @Inject constructor(
 
         scope.launch {
             tokenDataStore.tokenFlow.collect { token ->
+                tokenProvider.forceUpdateToken(token)
                 _isLoggedIn.value = token != null
             }
         }
@@ -60,6 +62,7 @@ class SessionManager @Inject constructor(
      * Guarda la sesión del usuario después del login
      */
     suspend fun saveSession(token: String, role: String) {
+        tokenProvider.forceUpdateToken(token)
         tokenDataStore.saveSession(token, role)
         cachedRole = UserRole.fromString(role)
         _currentRole.value = cachedRole
@@ -70,6 +73,7 @@ class SessionManager @Inject constructor(
      * Cierra la sesión del usuario
      */
     suspend fun logout() {
+        tokenProvider.forceUpdateToken(null)
         tokenDataStore.clearSession()
         cachedRole = UserRole.PAREJA
         _currentRole.value = UserRole.PAREJA

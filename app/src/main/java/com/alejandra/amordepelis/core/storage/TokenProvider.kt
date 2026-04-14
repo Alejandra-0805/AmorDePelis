@@ -5,7 +5,6 @@ import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 @Singleton
@@ -27,4 +26,8 @@ class TokenProvider @Inject constructor(
     }
 
     fun getToken(): String? = cachedToken
+
+    fun forceUpdateToken(token: String?) {
+        cachedToken = token
+    }
 }

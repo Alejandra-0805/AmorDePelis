@@ -133,6 +133,14 @@ class AuthViewModel @Inject constructor(
                 sessionManager.saveSession(response.token, response.role)
                 Log.d("AuthViewModel", "Session saved after auto-login with role: ${response.role}")
 
+                // Crear automáticamente la sala "enamorados"
+                viewModelScope.launch {
+                    val roomResult = authUseCases.createRoom("enamorados")
+                    roomResult.onFailure {
+                        Log.e("AuthViewModel", "Error creating auto room 'enamorados': ${it.message}")
+                    }
+                }
+
                 _uiState.update { currentState ->
                     currentState.copy(
                         isLoading = false,

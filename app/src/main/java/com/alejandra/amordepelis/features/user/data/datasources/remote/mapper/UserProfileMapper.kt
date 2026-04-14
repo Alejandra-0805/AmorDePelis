@@ -4,18 +4,20 @@ import com.alejandra.amordepelis.features.user.data.datasources.remote.model.Use
 import com.alejandra.amordepelis.features.user.domain.entities.PartnerProfile
 import com.alejandra.amordepelis.features.user.domain.entities.UserProfile
 
-fun UserProfileDto.toDomain(): UserProfile {
+fun UserProfileDto.toDomain(roomName: String? = null, ownInviteCode: String? = null): UserProfile {
     return UserProfile(
-        id = id,
-        username = username,
+        id = id.toString(),
+        username = username ?: "",
         email = email,
-        passwordMasked = passwordMasked,
+        passwordMasked = passwordMasked ?: "********",
         partner = partner?.let {
             PartnerProfile(
                 id = it.id,
                 username = it.username,
                 email = it.email
             )
-        }
+        },
+        roomName = roomName,
+        ownInviteCode = ownInviteCode
     )
 }

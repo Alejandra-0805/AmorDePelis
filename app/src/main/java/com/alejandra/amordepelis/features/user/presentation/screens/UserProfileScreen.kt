@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -80,6 +82,8 @@ fun UserProfileScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
+                .padding(bottom = 20.dp) // extra space at bottom
+                .verticalScroll(rememberScrollState())
         ) {
             UserHeader(title = uiState.screenTitle)
 
@@ -100,10 +104,13 @@ fun UserProfileScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             PartnerSectionCard(
-                hasPartner = uiState.hasPartner,
+                hasPartner = uiState.hasPartner, // Supone que hasPartner es verdadero cuando el usuario tiene un guest_id en su sala o pertenece a otra
+                ownInviteCode = uiState.ownInviteCode, // Lo trae del backend en el DTO 
+                roomName = uiState.roomName,
                 partnerUsername = uiState.partnerUsername,
-                partnerEmail = uiState.partnerEmail,
-                onAddPartnerClick = onAddPartnerClick,
+                inviteCodeInput = uiState.inviteCodeInput, 
+                onInviteCodeChange = viewModel::onInviteCodeChange,
+                onJoinRoomClick = viewModel::joinRoom,
                 modifier = Modifier.padding(horizontal = 20.dp)
             )
         }
