@@ -1,6 +1,7 @@
 package com.alejandra.amordepelis.core.navigation
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Campaign
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Movie
@@ -40,6 +41,14 @@ sealed class BottomNavItem(
         label = "Perfil"
     )
 
+    // Solo visible para ADMIN: crear un nuevo anuncio/noticia
+    data object AddAnnouncementItem : BottomNavItem(
+        route = AddAnnouncement,
+        icon = Icons.Default.Campaign,
+        label = "Anuncio",
+        visibleForRoles = setOf(UserRole.ADMIN)
+    )
+
     fun isVisibleFor(role: UserRole): Boolean = role in visibleForRoles
 
     companion object {
@@ -47,6 +56,7 @@ sealed class BottomNavItem(
             HomeItem,
             MoviesItem,
             ListsItem,
+            AddAnnouncementItem,
             UserItem
         )
 

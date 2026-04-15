@@ -55,39 +55,33 @@ class HomeViewModel @Inject constructor(
             _error.value = null
 
             runCatching {
-                val metrics = homeUseCases.getMetrics()
-                val recentMovies = homeUseCases.getRecentMovies()
-                val announcements = homeUseCases.getAnnouncements()
-                val latestNews = homeUseCases.getLatestNews()
+                val movies = homeUseCases.getAllMovies()
+                val allNews = homeUseCases.getAllNews()
+                val latestNews = try { homeUseCases.getLatestNews() } catch (_: Exception) { null }
 
                 _uiState.update {
                     it.copy(
-                        firstPersonName = metrics.firstPersonName,
-                        secondPersonName = metrics.secondPersonName,
-                        moviesWatched = metrics.moviesWatched,
-                        favorites = metrics.favorites,
-                        averageRating = metrics.averageRating,
-                        lists = metrics.lists,
-                        recentMovies = recentMovies.map { movie ->
+                        moviesWatched = movies.size,
+                        recentMovies = movies.take(5).map { movie ->
                             RecentMovieUiModel(
                                 id = movie.id,
                                 title = movie.title,
-                                rating = movie.rating,
-                                durationMinutes = movie.durationMinutes,
-                                genre = movie.genre
+                                imageUrl = movie.imageUrl
                             )
                         },
-                        latestNews = AnnouncementUiModel(
-                            id = latestNews.id,
-                            title = latestNews.title,
-                            description = latestNews.description,
-                            imageUrl = latestNews.imageUrl
-                        ),
+                        latestNews = latestNews?.let { news ->
+                            AnnouncementUiModel(
+                                id = news.id,
+                                title = news.title,
+                                description = news.description,
+                                imageUrl = news.imageUrl
+                            )
+                        },
                         isLoading = false
                     )
                 }
 
-                _announcements.value = announcements.map { announcement ->
+                _announcements.value = allNews.map { announcement ->
                     AnnouncementUiModel(
                         id = announcement.id,
                         title = announcement.title,

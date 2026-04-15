@@ -1,12 +1,12 @@
 package com.alejandra.amordepelis.features.home.domain.repositories
 
 import com.alejandra.amordepelis.features.home.domain.entities.Announcement
-import com.alejandra.amordepelis.features.home.domain.entities.Metrics
 import com.alejandra.amordepelis.features.home.domain.entities.Movie
+import java.io.File
 
 interface HomeRepository {
-    suspend fun getMetrics(): Metrics
-    suspend fun getRecentMovies(): List<Movie>
-    suspend fun getAnnouncements(): List<Announcement>
+    suspend fun getAllMovies(): List<Movie>
     suspend fun getLatestNews(): Announcement
+    suspend fun getAllNews(): List<Announcement>
+    suspend fun createAnnouncement(title: String, content: String, imageFile: File?): Announcement
 }

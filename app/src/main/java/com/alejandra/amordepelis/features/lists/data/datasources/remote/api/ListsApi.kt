@@ -1,33 +1,33 @@
 package com.alejandra.amordepelis.features.lists.data.datasources.remote.api
 
-import com.alejandra.amordepelis.features.lists.data.datasources.remote.model.AnnouncementDto
 import com.alejandra.amordepelis.features.lists.data.datasources.remote.model.CreateListRequestDto
-import com.alejandra.amordepelis.features.lists.data.datasources.remote.model.SharedListDetailsDto
-import com.alejandra.amordepelis.features.lists.data.datasources.remote.model.SharedListDto
-import com.alejandra.amordepelis.features.lists.data.datasources.remote.model.UpdateListRequestDto
+import com.alejandra.amordepelis.features.lists.data.datasources.remote.model.CustomListResponseDto
+import com.alejandra.amordepelis.features.movies.data.datasources.remote.model.MovieDto
 import retrofit2.http.Body
-import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
-import retrofit2.http.PUT
 import retrofit2.http.Path
 
 interface ListsApi {
-    @GET("lists")
-    suspend fun getSharedLists(): List<SharedListDto>
+    @GET("rooms/{roomId}/lists")
+    suspend fun getRoomLists(@Path("roomId") roomId: Int): List<CustomListResponseDto>
 
-    @GET("lists/{listId}")
-    suspend fun getSharedListDetails(@Path("listId") listId: String): SharedListDetailsDto
+    @POST("rooms/{roomId}/lists")
+    suspend fun createRoomList(
+        @Path("roomId") roomId: Int,
+        @Body request: CreateListRequestDto
+    ): CustomListResponseDto
 
-    @POST("lists")
-    suspend fun createSharedList(@Body request: CreateListRequestDto): SharedListDto
+    @GET("rooms/{roomId}/lists/{listId}/movies")
+    suspend fun getListMovies(
+        @Path("roomId") roomId: Int,
+        @Path("listId") listId: Int
+    ): List<MovieDto>
 
-    @PUT("lists")
-    suspend fun updateSharedList(@Body request: UpdateListRequestDto)
-
-    @DELETE("lists/{listId}")
-    suspend fun deleteSharedList(@Path("listId") listId: String)
-
-    @GET("lists/announcements")
-    suspend fun getAnnouncements(): List<AnnouncementDto>
+    @POST("rooms/{roomId}/lists/{listId}/movies/{movieId}")
+    suspend fun addMovieToList(
+        @Path("roomId") roomId: Int,
+        @Path("listId") listId: Int,
+        @Path("movieId") movieId: Int
+    )
 }

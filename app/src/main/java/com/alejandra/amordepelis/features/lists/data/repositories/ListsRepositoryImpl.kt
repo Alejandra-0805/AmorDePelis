@@ -1,41 +1,33 @@
 package com.alejandra.amordepelis.features.lists.data.repositories
 
 import com.alejandra.amordepelis.features.lists.data.datasources.remote.api.ListsApi
-import com.alejandra.amordepelis.features.lists.data.datasources.remote.mapper.toAnnouncementDomainList
 import com.alejandra.amordepelis.features.lists.data.datasources.remote.mapper.toDomain
 import com.alejandra.amordepelis.features.lists.data.datasources.remote.mapper.toDto
-import com.alejandra.amordepelis.features.lists.domain.entities.Announcement
+import com.alejandra.amordepelis.features.lists.data.datasources.remote.mapper.toSharedListDetails
 import com.alejandra.amordepelis.features.lists.domain.entities.CreateListParams
 import com.alejandra.amordepelis.features.lists.domain.entities.SharedList
 import com.alejandra.amordepelis.features.lists.domain.entities.SharedListDetails
-import com.alejandra.amordepelis.features.lists.domain.entities.UpdateListParams
 import com.alejandra.amordepelis.features.lists.domain.repositories.ListsRepository
 import javax.inject.Inject
 
 class ListsRepositoryImpl @Inject constructor(
-    private val api: ListsApi
+    private val listsApi: ListsApi
 ) : ListsRepository {
-    override suspend fun getSharedLists(): List<SharedList> {
-        return api.getSharedLists().map { it.toDomain() }
+
+    override suspend fun getSharedLists(roomId: Int): List<SharedList> {
+        return listsApi.getRoomLists(roomId).map { it.toDomain() }
     }
 
-    override suspend fun getSharedListDetails(listId: String): SharedListDetails {
-        return api.getSharedListDetails(listId).toDomain()
+    override suspend fun getSharedListDetails(roomId: Int, listId: Int, listName: String): SharedListDetails {
+        val movies = listsApi.getListMovies(roomId, listId)
+        return movies.toSharedListDetails(listId.toString(), listName)
     }
 
     override suspend fun createSharedList(params: CreateListParams): SharedList {
-        return api.createSharedList(params.toDto()).toDomain()
+        return listsApi.createRoomList(params.roomId, params.toDto()).toDomain()
     }
 
-    override suspend fun updateSharedList(params: UpdateListParams) {
-        api.updateSharedList(params.toDto())
-    }
-
-    override suspend fun deleteSharedList(listId: String) {
-        api.deleteSharedList(listId)
-    }
-
-    override suspend fun getAnnouncements(): List<Announcement> {
-        return api.getAnnouncements().toAnnouncementDomainList()
+    override suspend fun addMovieToList(roomId: Int, listId: Int, movieId: Int) {
+        listsApi.addMovieToList(roomId, listId, movieId)
     }
 }

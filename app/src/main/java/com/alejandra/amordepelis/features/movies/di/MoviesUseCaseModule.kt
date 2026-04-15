@@ -1,9 +1,9 @@
 package com.alejandra.amordepelis.features.movies.di
 
 import com.alejandra.amordepelis.features.movies.domain.repositories.MoviesRepository
-import com.alejandra.amordepelis.features.movies.domain.usecases.AddMovieUseCase
-import com.alejandra.amordepelis.features.movies.domain.usecases.GetMovieDetailsUseCase
 import com.alejandra.amordepelis.features.movies.domain.usecases.GetMoviesUseCase
+import com.alejandra.amordepelis.features.movies.domain.usecases.SearchMoviesUseCase
+import com.alejandra.amordepelis.features.movies.domain.usecases.AddMovieUseCase
 import com.alejandra.amordepelis.features.movies.domain.usecases.MoviesUseCases
 import dagger.Module
 import dagger.Provides
@@ -23,8 +23,8 @@ object MoviesUseCaseModule {
 
     @Provides
     @Singleton
-    fun provideGetMovieDetailsUseCase(repository: MoviesRepository): GetMovieDetailsUseCase {
-        return GetMovieDetailsUseCase(repository)
+    fun provideSearchMoviesUseCase(repository: MoviesRepository): SearchMoviesUseCase {
+        return SearchMoviesUseCase(repository)
     }
 
     @Provides
@@ -37,12 +37,12 @@ object MoviesUseCaseModule {
     @Singleton
     fun provideMoviesUseCases(
         getMoviesUseCase: GetMoviesUseCase,
-        getMovieDetailsUseCase: GetMovieDetailsUseCase,
+        searchMoviesUseCase: SearchMoviesUseCase,
         addMovieUseCase: AddMovieUseCase
     ): MoviesUseCases {
         return MoviesUseCases(
             getMovies = getMoviesUseCase,
-            getMovieDetails = getMovieDetailsUseCase,
+            searchMovies = searchMoviesUseCase,
             addMovie = addMovieUseCase
         )
     }

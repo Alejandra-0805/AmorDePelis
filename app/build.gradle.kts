@@ -85,6 +85,9 @@ dependencies {
     implementation(libs.androidx.datastore.core)
     ksp(libs.hilt.compiler)
 
+    // Biometric
+    implementation(libs.androidx.biometric)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

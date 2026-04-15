@@ -8,6 +8,7 @@ data class TagDto(
 data class MovieDto(
     val id: Int,
     val title: String,
+    val synopsis: String? = null,
     val imageUrl: String? = null,
     val tags: List<TagDto> = emptyList()
 )

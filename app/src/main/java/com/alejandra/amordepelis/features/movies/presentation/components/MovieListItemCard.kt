@@ -83,6 +83,17 @@ fun MovieListItemCard(
                     overflow = TextOverflow.Ellipsis
                 )
 
+                if (!movie.synopsis.isNullOrBlank()) {
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = movie.synopsis,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+
                 if (movie.tags.isNotEmpty()) {
                     Spacer(modifier = Modifier.height(8.dp))
                     androidx.compose.foundation.lazy.LazyRow(

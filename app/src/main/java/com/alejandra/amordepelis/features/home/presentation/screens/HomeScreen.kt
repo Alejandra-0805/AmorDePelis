@@ -522,49 +522,14 @@ private fun MovieItemCard(
                         color = MaterialTheme.colorScheme.onSurface,
                         fontWeight = FontWeight.SemiBold
                     )
-                    Spacer(modifier = Modifier.height(6.dp))
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = Icons.Default.Star,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.size(16.dp)
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(
-                            text = movie.rating.toString(),
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Icon(
-                            imageVector = Icons.Default.AccessTime,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.size(16.dp)
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(
-                            text = "${movie.durationMinutes}m",
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
                 }
 
-                OutlinedButton(
-                    onClick = {},
-                    shape = RoundedCornerShape(999.dp),
-                    border = androidx.compose.foundation.BorderStroke(
-                        width = 1.dp,
-                        color = MaterialTheme.colorScheme.primary
-                    ),
-                    colors = ButtonDefaults.outlinedButtonColors(
-                        contentColor = MaterialTheme.colorScheme.primary
-                    )
-                ) {
-                    Text(text = movie.genre)
-                }
+                Icon(
+                    imageVector = Icons.Default.Movie,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(24.dp)
+                )
             }
         }
     }
@@ -577,9 +542,9 @@ private fun HomeScreenPreview() {
         HomeScreenContent(
             uiState = HomeUiState(
                 recentMovies = listOf(
-                    RecentMovieUiModel("1", "Titanic", 4, 127, "Romance"),
-                    RecentMovieUiModel("2", "Yo antes de ti", 4, 127, "Romance"),
-                    RecentMovieUiModel("3", "Harry Potter", 4, 127, "Fantasía")
+                    RecentMovieUiModel("1", "Titanic"),
+                    RecentMovieUiModel("2", "Yo antes de ti"),
+                    RecentMovieUiModel("3", "Harry Potter")
                 ),
                 lists = 2
             ),

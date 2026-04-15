@@ -34,11 +34,10 @@ class AndroidAppVibrator @Inject constructor(
             // Android 8.0+: Usamos VibrationEffect
             val effect = VibrationEffect.createOneShot(durationMs, VibrationEffect.DEFAULT_AMPLITUDE)
 
-            // ¡ESTA ES LA CLAVE! Le decimos al sistema que esto es una Notificación
-            // Así ZTE, Samsung o Xiaomi no lo ignoran.
+            // Cambiamos a USAGE_ALARM para asegurar que el sistema operativo NO lo ignore bajo ninguna circunstancia
             val audioAttributes = AudioAttributes.Builder()
                 .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                .setUsage(AudioAttributes.USAGE_NOTIFICATION_COMMUNICATION_INSTANT)
+                .setUsage(AudioAttributes.USAGE_ALARM)
                 .build()
 
             vibrator.vibrate(effect, audioAttributes)
@@ -56,7 +55,7 @@ class AndroidAppVibrator @Inject constructor(
             val effect = VibrationEffect.createWaveform(pattern, repeat)
             val audioAttributes = AudioAttributes.Builder()
                 .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                .setUsage(AudioAttributes.USAGE_NOTIFICATION_COMMUNICATION_INSTANT)
+                .setUsage(AudioAttributes.USAGE_ALARM)
                 .build()
 
             vibrator.vibrate(effect, audioAttributes)

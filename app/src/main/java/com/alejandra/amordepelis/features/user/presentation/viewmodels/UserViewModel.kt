@@ -3,8 +3,7 @@ package com.alejandra.amordepelis.features.user.presentation.viewmodels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.alejandra.amordepelis.features.user.domain.usecases.UserUseCases
-import com.alejandra.amordepelis.features.user.presentation.screens.PartnerSearchResultUiModel
-import com.alejandra.amordepelis.features.user.presentation.screens.PartnerSearchUiState
+import com.alejandra.amordepelis.core.storage.SessionManager
 import com.alejandra.amordepelis.features.user.presentation.screens.UserAnnouncement
 import com.alejandra.amordepelis.features.user.presentation.screens.UserProfileUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -17,14 +16,12 @@ import javax.inject.Inject
 
 @HiltViewModel
 class UserViewModel @Inject constructor(
-    private val useCases: UserUseCases
+    private val useCases: UserUseCases,
+    private val sessionManager: SessionManager
 ) : ViewModel() {
 
     private val _profileUiState = MutableStateFlow(UserProfileUiState())
     val profileUiState: StateFlow<UserProfileUiState> = _profileUiState.asStateFlow()
-
-    private val _partnerSearchUiState = MutableStateFlow(PartnerSearchUiState())
-    val partnerSearchUiState: StateFlow<PartnerSearchUiState> = _partnerSearchUiState.asStateFlow()
 
     private val _announcements = MutableStateFlow<List<UserAnnouncement>>(emptyList())
     val announcements: StateFlow<List<UserAnnouncement>> = _announcements.asStateFlow()
@@ -91,82 +88,8 @@ class UserViewModel @Inject constructor(
         }
     }
 
-    fun onSearchQueryChange(query: String) {
-        _partnerSearchUiState.update { it.copy(searchQuery = query, error = null) }
-    }
-
-    fun searchUsersByUsername() {
-        val query = _partnerSearchUiState.value.searchQuery.trim()
-        if (query.isBlank()) {
-            _partnerSearchUiState.update { it.copy(error = "Ingresa un username para buscar") }
-            return
-        }
-
-        viewModelScope.launch {
-            _partnerSearchUiState.update { it.copy(isLoading = true, error = null) }
-            runCatching { useCases.searchUsersByUsername(query) }
-                .onSuccess { users ->
-                    _partnerSearchUiState.update {
-                        it.copy(
-                            isLoading = false,
-                            results = users.map { user ->
-                                PartnerSearchResultUiModel(
-                                    id = user.id,
-                                    username = user.username,
-                                    email = user.email
-                                )
-                            }
-                        )
-                    }
-                }
-                .onFailure { throwable ->
-                    _partnerSearchUiState.update {
-                        it.copy(isLoading = false, error = throwable.message ?: "Error searching users")
-                    }
-                }
-        }
-    }
-
-    fun sendPartnerInvitation(userId: String) {
-        viewModelScope.launch {
-            _partnerSearchUiState.update { state ->
-                state.copy(
-                    results = state.results.map {
-                        if (it.id == userId) it.copy(isInviting = true) else it
-                    }
-                )
-            }
-
-            runCatching { useCases.sendPartnerInvitation(userId) }
-                .onSuccess {
-                    _partnerSearchUiState.update { state ->
-                        state.copy(
-                            message = "Invitacion enviada",
-                            results = state.results.map {
-                                if (it.id == userId) it.copy(isInviting = false) else it
-                            }
-                        )
-                    }
-                }
-                .onFailure { throwable ->
-                    _partnerSearchUiState.update { state ->
-                        state.copy(
-                            error = throwable.message ?: "Error sending invitation",
-                            results = state.results.map {
-                                if (it.id == userId) it.copy(isInviting = false) else it
-                            }
-                        )
-                    }
-                }
-        }
-    }
-
     fun clearProfileMessage() {
         _profileUiState.update { it.copy(message = null, error = null) }
-    }
-
-    fun clearPartnerSearchMessage() {
-        _partnerSearchUiState.update { it.copy(message = null) }
     }
 
     fun toggleEditMode() {
@@ -189,7 +112,7 @@ class UserViewModel @Inject constructor(
             runCatching { useCases.updateUserProfile(currentState.id, currentState.username) }
                 .onSuccess {
                     _profileUiState.update { it.copy(isEditing = false, message = "Perfil actualizado") }
-                    loadUserProfile() // Reload context if necessary
+                    loadUserProfile()
                 }
                 .onFailure { throwable ->
                     _profileUiState.update { it.copy(isLoading = false, error = throwable.message ?: "Error al actualizar perfil") }
@@ -208,7 +131,6 @@ class UserViewModel @Inject constructor(
             runCatching { useCases.deleteUser(currentState.id) }
                 .onSuccess {
                     _profileUiState.update { it.copy(isDeleting = false, showDeleteDialog = false, message = "Perfil eliminado correctamente") }
-                    // Here we ideally notify UI to log out
                 }
                 .onFailure { throwable ->
                     _profileUiState.update { it.copy(isDeleting = false, showDeleteDialog = false, error = throwable.message ?: "Error al eliminar perfil") }
@@ -217,13 +139,12 @@ class UserViewModel @Inject constructor(
     }
 
     fun onInviteCodeChange(newCode: String) {
-    _profileUiState.update { it.copy(inviteCodeInput = newCode) }
+        _profileUiState.update { it.copy(inviteCodeInput = newCode) }
     }
 
     fun joinRoom() {
         val code = _profileUiState.value.inviteCodeInput.trim()
         
-        // Validación Simple
         if (code.isBlank() || code == _profileUiState.value.ownInviteCode) {
             _profileUiState.update { it.copy(error = "El código ingresado es inválido o es tu propio código.") }
             return
@@ -232,19 +153,17 @@ class UserViewModel @Inject constructor(
         viewModelScope.launch {
             _profileUiState.update { it.copy(isLoading = true, error = null) }
             runCatching {
-                // Llama a tu UseCase respectivo configurado en Hilt
                 useCases.joinVirtualRoom(code) 
             }.onSuccess { 
-                // Éxito: Modifica el estado global (StateFlow)
                 _profileUiState.update { 
                     it.copy(
                         isLoading = false,
                         hasPartner = true, 
                         message = "¡Pareja vinculada exitosamente!",
-                        inviteCodeInput = "" // Limpiar caja
+                        inviteCodeInput = ""
                     ) 
                 }
-                loadUserProfile() // Refresca los detalles del usuario
+                loadUserProfile()
             }.onFailure { throwable ->
                 _profileUiState.update { 
                     it.copy(
@@ -253,6 +172,12 @@ class UserViewModel @Inject constructor(
                     )
                 }
             }
+        }
+    }
+
+    fun logout() {
+        viewModelScope.launch {
+            sessionManager.logout()
         }
     }
 }
