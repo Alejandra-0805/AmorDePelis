@@ -28,39 +28,20 @@ class SessionManager @Inject constructor(
     private val _isLoggedIn = MutableStateFlow(false)
     val isLoggedIn: StateFlow<Boolean> = _isLoggedIn.asStateFlow()
 
-    private val _currentRoomId = MutableStateFlow<String?>(null)
-    val currentRoomId: StateFlow<String?> = _currentRoomId.asStateFlow()
-
     @Volatile
     private var cachedRole: UserRole = UserRole.PAREJA
-
-    @Volatile
-    private var cachedRoomId: String? = null
 
     init {
         scope.launch {
             // Cargar rol inicial
             cachedRole = tokenDataStore.getRole()
             _currentRole.value = cachedRole
-            
-            cachedRoomId = tokenDataStore.getRoomId()
-            _currentRoomId.value = cachedRoomId
-            
             _isLoggedIn.value = tokenDataStore.getToken() != null
 
             // Observar cambios en el rol
-            launch {
-                tokenDataStore.roleFlow.collect { role ->
-                    cachedRole = role
-                    _currentRole.value = role
-                }
-            }
-            
-            launch {
-                tokenDataStore.roomIdFlow.collect { roomId ->
-                    cachedRoomId = roomId
-                    _currentRoomId.value = roomId
-                }
+            tokenDataStore.roleFlow.collect { role ->
+                cachedRole = role
+                _currentRole.value = role
             }
         }
 
@@ -76,14 +57,6 @@ class SessionManager @Inject constructor(
      * Obtiene el rol actual de forma síncrona (usa cache)
      */
     fun getRole(): UserRole = cachedRole
-
-    fun getRoomId(): String? = cachedRoomId
-
-    suspend fun saveRoomId(roomId: String) {
-        tokenDataStore.saveRoomId(roomId)
-        cachedRoomId = roomId
-        _currentRoomId.value = roomId
-    }
 
     /**
      * Guarda la sesión del usuario después del login
@@ -104,8 +77,6 @@ class SessionManager @Inject constructor(
         tokenDataStore.clearSession()
         cachedRole = UserRole.PAREJA
         _currentRole.value = UserRole.PAREJA
-        cachedRoomId = null
-        _currentRoomId.value = null
         _isLoggedIn.value = false
     }
 

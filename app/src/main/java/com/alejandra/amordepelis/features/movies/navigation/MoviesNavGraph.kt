@@ -4,6 +4,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
+import androidx.navigation.toRoute
 import com.alejandra.amordepelis.core.navigation.AddMovie
 import com.alejandra.amordepelis.core.navigation.FeatureNavGraph
 import com.alejandra.amordepelis.core.navigation.MovieDetails
@@ -24,7 +25,7 @@ class MoviesNavGraph @Inject constructor(
         navGraphBuilder.composable<Movies> {
             MoviesListScreen(
                 onMovieClick = { movieId ->
-                    navController.navigate(MovieDetails)
+                    navController.navigate(MovieDetails(movieId))
                 },
                 onAddMovieClick = {
                     navController.navigate(AddMovie)
@@ -32,9 +33,10 @@ class MoviesNavGraph @Inject constructor(
             )
         }
 
-        navGraphBuilder.composable<MovieDetails> {
+        navGraphBuilder.composable<MovieDetails> { backStackEntry ->
+            val args = backStackEntry.toRoute<MovieDetails>()
             MovieDetailScreen(
-                movieId = "" // TODO: Pass actual movieId when implementing navigation with arguments
+                movieId = args.movieId
             )
         }
 

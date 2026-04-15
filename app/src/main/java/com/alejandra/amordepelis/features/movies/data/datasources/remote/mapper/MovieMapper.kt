@@ -7,6 +7,7 @@ fun MovieDto.toDomain(): Movie {
     return Movie(
         id = id.toString(),
         title = title,
+        synopsis = synopsis,
         imageUrl = imageUrl,
         tags = tags.map { it.name }
     )

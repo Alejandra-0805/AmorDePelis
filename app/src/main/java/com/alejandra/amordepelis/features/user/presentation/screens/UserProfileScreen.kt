@@ -113,6 +113,19 @@ fun UserProfileScreen(
                 onJoinRoomClick = viewModel::joinRoom,
                 modifier = Modifier.padding(horizontal = 20.dp)
             )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Button(
+                onClick = { viewModel.logout() },
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp)
+                    .padding(bottom = 20.dp)
+            ) {
+                Text("Cerrar Sesión")
+            }
         }
     }
 }

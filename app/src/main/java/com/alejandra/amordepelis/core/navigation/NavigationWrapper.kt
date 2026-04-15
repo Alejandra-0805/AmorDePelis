@@ -102,6 +102,7 @@ private fun getCurrentRoute(route: String?): Any? {
         route.contains(Home::class.qualifiedName ?: "") -> Home
         route.contains(Movies::class.qualifiedName ?: "") -> Movies
         route.contains(Lists::class.qualifiedName ?: "") -> Lists
+        route.contains(AddAnnouncement::class.qualifiedName ?: "") -> AddAnnouncement
         route.contains(User::class.qualifiedName ?: "") -> User
         else -> null
     }

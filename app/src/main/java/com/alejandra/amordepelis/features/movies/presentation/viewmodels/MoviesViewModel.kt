@@ -4,40 +4,53 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.alejandra.amordepelis.core.storage.SessionManager
 import com.alejandra.amordepelis.core.storage.UserRole
-import com.alejandra.amordepelis.features.movies.domain.entities.AddMovieParams
 import com.alejandra.amordepelis.features.movies.domain.usecases.MoviesUseCases
-import com.alejandra.amordepelis.features.movies.presentation.screens.AddMovieUiState
 import com.alejandra.amordepelis.features.movies.presentation.screens.Announcement
-import com.alejandra.amordepelis.features.movies.presentation.screens.MovieDetailsUiState
 import com.alejandra.amordepelis.features.movies.presentation.screens.MoviesListUiState
+import com.alejandra.amordepelis.core.hardware.domain.HapticFeedbackManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.io.File
+import java.io.FileOutputStream
+import android.content.Context
+import android.net.Uri
+import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
+
+data class AddMovieUiState(
+    val title: String = "",
+    val synopsis: String = "",
+    val imageUri: String? = null,
+    val rating: Int = 0,
+    val isFavorite: Boolean = false,
+    val isLoading: Boolean = false,
+    val error: String? = null,
+    val isSaved: Boolean = false
+)
 
 @HiltViewModel
 class MoviesViewModel @Inject constructor(
     private val useCases: MoviesUseCases,
-    private val sessionManager: SessionManager
+    private val sessionManager: SessionManager,
+    @ApplicationContext private val context: Context,
+    private val hapticFeedbackManager: HapticFeedbackManager
 ) : ViewModel() {
 
     private val _listUiState = MutableStateFlow(MoviesListUiState())
     val listUiState: StateFlow<MoviesListUiState> = _listUiState.asStateFlow()
-
-    private val _detailsUiState = MutableStateFlow(MovieDetailsUiState())
-    val detailsUiState: StateFlow<MovieDetailsUiState> = _detailsUiState.asStateFlow()
-
-    private val _addUiState = MutableStateFlow(AddMovieUiState())
-    val addUiState: StateFlow<AddMovieUiState> = _addUiState.asStateFlow()
 
     private val _announcements = MutableStateFlow<List<Announcement>>(emptyList())
     val announcements: StateFlow<List<Announcement>> = _announcements.asStateFlow()
 
     private val _currentAnnouncementIndex = MutableStateFlow(0)
     val currentAnnouncementIndex: StateFlow<Int> = _currentAnnouncementIndex.asStateFlow()
+
+    private val _addMovieUiState = MutableStateFlow(AddMovieUiState())
+    val addMovieUiState: StateFlow<AddMovieUiState> = _addMovieUiState.asStateFlow()
 
     // Permisos basados en rol
     val currentRole: StateFlow<UserRole> = sessionManager.currentRole
@@ -104,16 +117,16 @@ class MoviesViewModel @Inject constructor(
         }
     }
 
-    fun loadMovieDetails(movieId: String) {
+    fun searchMovies(query: String) {
         viewModelScope.launch {
-            _detailsUiState.update { it.copy(isLoading = true, error = null) }
-            runCatching { useCases.getMovieDetails(movieId) }
-                .onSuccess { movie ->
-                    _detailsUiState.update { it.copy(isLoading = false, movie = movie) }
+            _listUiState.update { it.copy(isLoading = true, error = null) }
+            runCatching { useCases.searchMovies(query) }
+                .onSuccess { movies ->
+                    _listUiState.update { it.copy(isLoading = false, movies = movies) }
                 }
                 .onFailure { throwable ->
-                    _detailsUiState.update {
-                        it.copy(isLoading = false, error = throwable.message ?: "Error loading movie")
+                    _listUiState.update {
+                        it.copy(isLoading = false, error = throwable.message ?: "Error searching movies")
                     }
                 }
         }
@@ -125,101 +138,80 @@ class MoviesViewModel @Inject constructor(
     fun canMarkAsWatched(): Boolean = sessionManager.canMarkMoviesAsWatched()
     fun canMarkAsFavorite(): Boolean = sessionManager.canMarkMoviesAsFavorite()
 
-    fun onTitleChange(value: String) {
-        _addUiState.update { it.copy(movieTitle = value, error = null) }
+    // Add Movie UI Actions
+    fun updateAddMovieTitle(title: String) {
+        _addMovieUiState.update { it.copy(title = title) }
     }
 
-    fun onSynopsisChange(value: String) {
-        _addUiState.update { it.copy(synopsis = value, error = null) }
+    fun updateAddMovieSynopsis(synopsis: String) {
+        _addMovieUiState.update { it.copy(synopsis = synopsis) }
     }
 
-    fun onGenreChange(value: String) {
-        _addUiState.update { it.copy(genre = value, error = null) }
+    fun updateAddMovieImageUri(uri: String?) {
+        _addMovieUiState.update { it.copy(imageUri = uri) }
     }
 
-    fun onDurationChange(value: String) {
-        _addUiState.update { it.copy(durationMinutes = value, error = null) }
+    fun updateAddMovieRating(rating: Int) {
+        _addMovieUiState.update { it.copy(rating = rating) }
     }
 
-    fun onRatingChange(value: Int) {
-        _addUiState.update { it.copy(rating = value.coerceIn(0, 5), error = null) }
-    }
-
-    fun onFavoriteChange(value: Boolean) {
-        _addUiState.update { it.copy(isFavorite = value) }
-    }
-
-    fun addMovie() {
-        // Verificar permiso antes de agregar
-        if (!sessionManager.canAddMoviesToCatalog()) {
-            _addUiState.update { it.copy(error = "No tienes permiso para agregar películas al catálogo") }
-            return
-        }
-
-        val state = _addUiState.value
-        if (state.movieTitle.isBlank()) {
-            _addUiState.update { it.copy(error = "El título de la película es requerido") }
-            return
-        }
-
-        val duration = state.durationMinutes.toIntOrNull() ?: 0
-
-        viewModelScope.launch {
-            _addUiState.update { it.copy(isLoading = true, error = null, isSaved = false) }
-            runCatching {
-                useCases.addMovie(
-                    AddMovieParams(
-                        title = state.movieTitle,
-                        synopsis = state.synopsis,
-                        genre = state.genre,
-                        durationMinutes = duration,
-                        rating = state.rating,
-                        isFavorite = state.isFavorite
-                    )
-                )
-            }.onSuccess {
-                _addUiState.update {
-                    it.copy(
-                        isLoading = false,
-                        isSaved = true,
-                        movieTitle = "",
-                        synopsis = "",
-                        genre = "",
-                        durationMinutes = "",
-                        rating = 0,
-                        isFavorite = false
-                    )
-                }
-            }.onFailure { throwable ->
-                _addUiState.update {
-                    it.copy(isLoading = false, error = throwable.message ?: "Error al guardar película")
-                }
-            }
-        }
+    fun updateAddMovieIsFavorite(isFavorite: Boolean) {
+        _addMovieUiState.update { it.copy(isFavorite = isFavorite) }
     }
 
     fun resetAddMovieState() {
-        _addUiState.update { it.copy(isSaved = false, error = null) }
+        _addMovieUiState.value = AddMovieUiState()
     }
 
-    fun addMovieToRoomOrList(movieId: String, roomId: String? = null, listId: String? = null) {
+    fun clearAddMovieError() {
+        _addMovieUiState.update { it.copy(error = null) }
+    }
+
+    fun addMovie() {
+        val state = _addMovieUiState.value
+        
+        if (state.title.isBlank()) {
+            _addMovieUiState.update { it.copy(error = "El título es obligatorio") }
+            return
+        }
+
         viewModelScope.launch {
-            if (roomId == null && listId == null) {
-                _detailsUiState.update { it.copy(error = "Debes seleccionar una sala o lista") }
-                return@launch
-            }
+            _addMovieUiState.update { it.copy(isLoading = true, error = null) }
             
-            runCatching {
-                // TODO: Implement actual use cases explicitly 
-                // e.g. useCases.addMovieToRoom(roomId, movieId)
-                // e.g. useCases.addMovieToList(listId, movieId)
-            }.onSuccess {
-                // Update UI state upon success
-                _detailsUiState.update { it.copy(error = null) }
-            }.onFailure { throwable ->
-                _detailsUiState.update {
-                    it.copy(error = throwable.message ?: "Error al agregar la película")
+            var tempFile: File? = null
+            if (state.imageUri != null) {
+                try {
+                    val uri = Uri.parse(state.imageUri)
+                    val inputStream = context.contentResolver.openInputStream(uri)
+                    if (inputStream != null) {
+                        tempFile = File(context.cacheDir, "upload_movie_${System.currentTimeMillis()}.jpg")
+                        val outputStream = FileOutputStream(tempFile)
+                        inputStream.copyTo(outputStream)
+                        inputStream.close()
+                        outputStream.close()
+                    }
+                } catch (e: Exception) {
+                    _addMovieUiState.update { it.copy(isLoading = false, error = "Error al procesar la imagen") }
+                    return@launch
                 }
+            }
+
+            runCatching {
+                useCases.addMovie(
+                    title = state.title,
+                    synopsis = state.synopsis.takeIf { it.isNotBlank() },
+                    durationMinutes = null,
+                    tags = null,
+                    imageFile = tempFile
+                )
+            }.onSuccess {
+                _addMovieUiState.update { it.copy(isLoading = false, isSaved = true) }
+                tempFile?.delete()
+                hapticFeedbackManager.vibrateForNotification()
+                loadMovies() // Refrescar cartelera global
+            }.onFailure { throwable ->
+                _addMovieUiState.update { it.copy(isLoading = false, error = throwable.message ?: "Error al subir película") }
+                tempFile?.delete()
             }
         }
     }

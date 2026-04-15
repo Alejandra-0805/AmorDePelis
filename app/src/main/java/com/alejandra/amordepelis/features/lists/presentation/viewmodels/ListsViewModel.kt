@@ -4,16 +4,18 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.alejandra.amordepelis.core.storage.SessionManager
 import com.alejandra.amordepelis.features.lists.domain.entities.CreateListParams
-import com.alejandra.amordepelis.features.lists.domain.entities.UpdateListParams
 import com.alejandra.amordepelis.features.lists.domain.usecases.ListsUseCases
 import com.alejandra.amordepelis.features.lists.presentation.screens.AddListUiState
 import com.alejandra.amordepelis.features.lists.presentation.screens.AnnouncementUiModel
-import com.alejandra.amordepelis.features.lists.presentation.screens.DeleteListModalUiState
-import com.alejandra.amordepelis.features.lists.presentation.screens.EditListModalUiState
 import com.alejandra.amordepelis.features.lists.presentation.screens.ListDetailsUiState
 import com.alejandra.amordepelis.features.lists.presentation.screens.ListsScreenUiState
 import com.alejandra.amordepelis.features.lists.presentation.screens.SharedListItemUiModel
+import com.alejandra.amordepelis.features.user.data.datasources.remote.api.UserApi
+import com.alejandra.amordepelis.core.hardware.domain.HapticFeedbackManager
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -24,7 +26,9 @@ import javax.inject.Inject
 @HiltViewModel
 class ListsViewModel @Inject constructor(
     private val useCases: ListsUseCases,
-    private val sessionManager: SessionManager
+    private val sessionManager: SessionManager,
+    private val userApi: UserApi,
+    private val hapticFeedbackManager: HapticFeedbackManager
 ) : ViewModel() {
 
     private val _listsUiState = MutableStateFlow(ListsScreenUiState())
@@ -35,12 +39,6 @@ class ListsViewModel @Inject constructor(
 
     private val _detailsUiState = MutableStateFlow(ListDetailsUiState())
     val detailsUiState: StateFlow<ListDetailsUiState> = _detailsUiState.asStateFlow()
-
-    private val _editModalUiState = MutableStateFlow(EditListModalUiState())
-    val editModalUiState: StateFlow<EditListModalUiState> = _editModalUiState.asStateFlow()
-
-    private val _deleteModalUiState = MutableStateFlow(DeleteListModalUiState())
-    val deleteModalUiState: StateFlow<DeleteListModalUiState> = _deleteModalUiState.asStateFlow()
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
@@ -57,8 +55,23 @@ class ListsViewModel @Inject constructor(
     private val _currentAnnouncementIndex = MutableStateFlow(0)
     val currentAnnouncementIndex: StateFlow<Int> = _currentAnnouncementIndex.asStateFlow()
 
+    // Estado del selector de lista para agregar una película
+    private val _movieIdPendingAdd = MutableStateFlow<String?>(null)
+    val movieIdPendingAdd: StateFlow<String?> = _movieIdPendingAdd.asStateFlow()
+
+    private val _isAddingMovieToList = MutableStateFlow(false)
+    val isAddingMovieToList: StateFlow<Boolean> = _isAddingMovieToList.asStateFlow()
+
+    // IDs de las listas que YA contienen la película pendiente de agregar
+    private val _listIdsContainingPendingMovie = MutableStateFlow<Set<String>>(emptySet())
+    val listIdsContainingPendingMovie: StateFlow<Set<String>> = _listIdsContainingPendingMovie.asStateFlow()
+
+    // Almacena el roomId activo del usuario
+    private var activeRoomId: Int? = null
+
     init {
         updatePermissions()
+        loadActiveRoom()
     }
 
     private fun updatePermissions() {
@@ -67,10 +80,24 @@ class ListsViewModel @Inject constructor(
                 _listsUiState.update { 
                     it.copy(
                         canCreateLists = role.canCreateLists(),
-                        canEditLists = role.canCreateLists(),
-                        canDeleteLists = role.canCreateLists()
+                        canEditLists = false,  // No existe endpoint de editar listas
+                        canDeleteLists = false  // No existe endpoint de eliminar listas
                     )
                 }
+            }
+        }
+    }
+
+    private fun loadActiveRoom() {
+        viewModelScope.launch {
+            try {
+                val rooms = userApi.getUserRooms()
+                if (rooms.isNotEmpty()) {
+                    activeRoomId = rooms.first().id
+                    loadSharedLists()
+                }
+            } catch (e: Exception) {
+                _error.value = "No se pudo cargar la sala activa"
             }
         }
     }
@@ -79,12 +106,7 @@ class ListsViewModel @Inject constructor(
     fun canCreateLists(): Boolean = sessionManager.canCreateLists()
 
     fun loadSharedLists() {
-        val roomId = sessionManager.currentRoomId.value
-        if (roomId == null) {
-            _error.value = "No estás en una sala. Por favor, crea o únete a una sala."
-            return
-        }
-
+        val roomId = activeRoomId ?: return
         viewModelScope.launch {
             _isLoading.value = true
             _error.value = null
@@ -107,6 +129,9 @@ class ListsViewModel @Inject constructor(
                         )
                     }
                     _isLoading.value = false
+                    // El backend no devuelve movieCount; lo calculamos en cliente
+                    // pidiendo las películas de cada lista en paralelo.
+                    enrichListsWithMovieCounts(roomId, lists.map { it.id })
                 }
                 .onFailure { throwable ->
                     _listsUiState.update {
@@ -118,27 +143,11 @@ class ListsViewModel @Inject constructor(
         }
     }
 
-    fun loadAnnouncements() {
-        viewModelScope.launch {
-            runCatching { useCases.getAnnouncements() }
-                .onSuccess { announcements ->
-                    _announcements.value = announcements.map { announcement ->
-                        AnnouncementUiModel(
-                            id = announcement.id,
-                            title = announcement.title,
-                            description = announcement.description,
-                            imageUrl = announcement.imageUrl
-                        )
-                    }
-                }
-                .onFailure { /* Ignore announcement loading errors */ }
-        }
-    }
-
-    fun loadListDetails(listId: String) {
+    fun loadListDetails(listId: String, listName: String = "") {
+        val roomId = activeRoomId ?: return
         viewModelScope.launch {
             _detailsUiState.update { it.copy(isLoading = true, error = null) }
-            runCatching { useCases.getSharedListDetails(listId) }
+            runCatching { useCases.getSharedListDetails(roomId, listId.toInt(), listName) }
                 .onSuccess { details ->
                     _detailsUiState.update {
                         it.copy(
@@ -170,19 +179,19 @@ class ListsViewModel @Inject constructor(
     fun createList() {
         // Verificar permiso antes de crear
         if (!sessionManager.canCreateLists()) {
-            _addListUiState.update { it.copy(error = "No tienes permiso para crear listas") }
+            _error.value = "No tienes permiso para crear listas"
             return
         }
 
-        val roomId = sessionManager.currentRoomId.value
+        val roomId = activeRoomId
         if (roomId == null) {
-            _addListUiState.update { it.copy(error = "No estás en una sala.") }
+            _error.value = "No se encontró una sala activa. Únete o crea una sala primero."
             return
         }
 
         val state = _addListUiState.value
         if (state.name.isBlank()) {
-            _addListUiState.update { it.copy(error = "El nombre de la lista es obligatorio") }
+            _error.value = "El nombre de la lista es obligatorio"
             return
         }
 
@@ -190,11 +199,9 @@ class ListsViewModel @Inject constructor(
             _addListUiState.update { it.copy(isLoading = true, error = null) }
             runCatching {
                 useCases.createSharedList(
-                    roomId,
                     CreateListParams(
-                        name = state.name,
-                        description = state.description,
-                        colorHex = state.colorHex
+                        roomId = roomId,
+                        name = state.name
                     )
                 )
             }.onSuccess {
@@ -207,11 +214,118 @@ class ListsViewModel @Inject constructor(
                     )
                 }
                 _message.value = "Lista creada exitosamente"
+                hapticFeedbackManager.vibrateForNotification()
+                loadSharedLists()
             }.onFailure { throwable ->
-                _addListUiState.update {
-                    it.copy(isLoading = false, error = throwable.message ?: "Error creating list")
+                _addListUiState.update { it.copy(isLoading = false) }
+                _error.value = throwable.message ?: "Error creating list"
+            }
+        }
+    }
+
+    fun requestAddMovieToList(movieId: String) {
+        val roomId = activeRoomId
+        if (roomId == null) {
+            _error.value = "No se encontró una sala activa. Únete o crea una sala primero."
+            return
+        }
+        if (_listsUiState.value.lists.isEmpty()) {
+            // Intenta recargar por si aún no se habían cargado, y avisa si sigue vacío
+            loadSharedLists()
+            if (_listsUiState.value.lists.isEmpty()) {
+                _error.value = "No tienes listas disponibles. Crea una lista primero."
+                return
+            }
+        }
+        _movieIdPendingAdd.value = movieId
+        _listIdsContainingPendingMovie.value = emptySet()
+        computeListsContainingMovie(roomId, movieId)
+    }
+
+    fun dismissAddMovieToList() {
+        if (_isAddingMovieToList.value) return
+        _movieIdPendingAdd.value = null
+        _listIdsContainingPendingMovie.value = emptySet()
+    }
+
+    private fun computeListsContainingMovie(roomId: Int, movieId: String) {
+        val targetMovieId = movieId
+        val lists = _listsUiState.value.lists
+        viewModelScope.launch {
+            runCatching {
+                coroutineScope {
+                    lists.map { list ->
+                        async {
+                            val contains = runCatching {
+                                useCases.getSharedListDetails(
+                                    roomId,
+                                    list.id.toInt(),
+                                    list.name
+                                ).movies.any { it.id == targetMovieId }
+                            }.getOrDefault(false)
+                            if (contains) list.id else null
+                        }
+                    }.awaitAll().filterNotNull().toSet()
+                }
+            }.onSuccess { ids ->
+                // Solo aplicamos si sigue siendo la misma película pendiente
+                if (_movieIdPendingAdd.value == targetMovieId) {
+                    _listIdsContainingPendingMovie.value = ids
                 }
             }
+        }
+    }
+
+    private fun enrichListsWithMovieCounts(roomId: Int, listIds: List<String>) {
+        if (listIds.isEmpty()) return
+        viewModelScope.launch {
+            runCatching {
+                coroutineScope {
+                    listIds.map { listId ->
+                        async {
+                            val count = runCatching {
+                                useCases.getSharedListDetails(
+                                    roomId,
+                                    listId.toInt(),
+                                    ""
+                                ).movies.size
+                            }.getOrNull()
+                            listId to count
+                        }
+                    }.awaitAll().toMap()
+                }
+            }.onSuccess { counts ->
+                _listsUiState.update { state ->
+                    state.copy(
+                        lists = state.lists.map { item ->
+                            val newCount = counts[item.id]
+                            if (newCount != null) item.copy(movieCount = newCount) else item
+                        }
+                    )
+                }
+            }
+        }
+    }
+
+    fun confirmAddMovieToList(listId: String) {
+        val roomId = activeRoomId ?: return
+        val movieId = _movieIdPendingAdd.value ?: return
+
+        viewModelScope.launch {
+            _isAddingMovieToList.value = true
+            runCatching {
+                useCases.addMovieToList(roomId, listId.toInt(), movieId.toInt())
+            }.onSuccess {
+                _message.value = "¡Agregado a la lista exitosamente!"
+                hapticFeedbackManager.vibrateForNotification()
+                _movieIdPendingAdd.value = null
+                loadSharedLists()
+            }.onFailure { throwable ->
+                _error.value = throwable.message
+                    ?: "No se pudo agregar a la lista. Puede que ya esté en ella."
+                _movieIdPendingAdd.value = null
+            }
+            _isAddingMovieToList.value = false
         }
     }
 
@@ -221,86 +335,6 @@ class ListsViewModel @Inject constructor(
 
     fun onAnnouncementIndexChanged(index: Int) {
         _currentAnnouncementIndex.value = index
-    }
-
-    fun openEditModal(list: SharedListItemUiModel) {
-        _editModalUiState.value = EditListModalUiState(
-            isVisible = true,
-            listId = list.id,
-            name = list.name,
-            description = list.description
-        )
-    }
-
-    fun closeEditModal() {
-        _editModalUiState.value = EditListModalUiState()
-    }
-
-    fun onEditNameChange(value: String) {
-        _editModalUiState.update { it.copy(name = value, error = null) }
-    }
-
-    fun onEditDescriptionChange(value: String) {
-        _editModalUiState.update { it.copy(description = value, error = null) }
-    }
-
-    fun saveListEdition() {
-        val state = _editModalUiState.value
-        if (state.name.isBlank()) {
-            _editModalUiState.update { it.copy(error = "El nombre no puede estar vacio") }
-            return
-        }
-
-        viewModelScope.launch {
-            _editModalUiState.update { it.copy(isSaving = true, error = null) }
-            runCatching {
-                useCases.updateSharedList(
-                    UpdateListParams(
-                        listId = state.listId,
-                        name = state.name,
-                        description = state.description
-                    )
-                )
-            }.onSuccess {
-                closeEditModal()
-                loadSharedLists()
-                _message.value = "Lista actualizada exitosamente"
-            }.onFailure { throwable ->
-                _editModalUiState.update {
-                    it.copy(isSaving = false, error = throwable.message ?: "Error updating list")
-                }
-            }
-        }
-    }
-
-    fun openDeleteModal(list: SharedListItemUiModel) {
-        _deleteModalUiState.value = DeleteListModalUiState(
-            isVisible = true,
-            listId = list.id,
-            listName = list.name
-        )
-    }
-
-    fun closeDeleteModal() {
-        _deleteModalUiState.value = DeleteListModalUiState()
-    }
-
-    fun deleteList() {
-        val state = _deleteModalUiState.value
-        viewModelScope.launch {
-            _deleteModalUiState.update { it.copy(isDeleting = true, error = null) }
-            runCatching { useCases.deleteSharedList(state.listId) }
-                .onSuccess {
-                    closeDeleteModal()
-                    loadSharedLists()
-                    _message.value = "Lista eliminada exitosamente"
-                }
-                .onFailure { throwable ->
-                    _deleteModalUiState.update {
-                        it.copy(isDeleting = false, error = throwable.message ?: "Error deleting list")
-                    }
-                }
-        }
     }
 
     fun clearMessage() {

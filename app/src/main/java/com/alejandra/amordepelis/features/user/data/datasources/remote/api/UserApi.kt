@@ -1,8 +1,6 @@
 package com.alejandra.amordepelis.features.user.data.datasources.remote.api
 
-import com.alejandra.amordepelis.features.user.data.datasources.remote.model.PartnerInvitationRequestDto
 import com.alejandra.amordepelis.features.user.data.datasources.remote.model.UserProfileDto
-import com.alejandra.amordepelis.features.user.data.datasources.remote.model.UserSearchResultDto
 import com.alejandra.amordepelis.features.user.data.datasources.remote.model.JoinRoomRequestDto
 import com.alejandra.amordepelis.features.user.data.datasources.remote.model.RoomResponseDto
 import okhttp3.MultipartBody
@@ -15,17 +13,10 @@ import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Part
 import retrofit2.http.Path
-import retrofit2.http.Query
 
 interface UserApi {
     @GET("users/{id}")
     suspend fun getUserProfile(@Path("id") id: Int): UserProfileDto
-
-    @GET("users/search")
-    suspend fun searchUsersByUsername(@Query("username") username: String): List<UserSearchResultDto>
-
-    @POST("users/partner/invite")
-    suspend fun sendPartnerInvitation(@Body request: PartnerInvitationRequestDto)
 
     @Multipart
     @PUT("users/{id}")
@@ -43,10 +34,4 @@ interface UserApi {
 
     @GET("rooms")
     suspend fun getUserRooms(): List<RoomResponseDto>
-
-    @POST("rooms/{roomId}/movies/{movieId}")
-    suspend fun addMovieToRoom(
-        @Path("roomId") roomId: String,
-        @Path("movieId") movieId: String
-    )
 }

@@ -22,6 +22,16 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.AlertDialog
+import androidx.compose.ui.layout.ContentScale
+import coil.compose.AsyncImage
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -31,19 +41,146 @@ import com.alejandra.amordepelis.features.movies.presentation.components.Announc
 import com.alejandra.amordepelis.features.movies.presentation.components.MovieListItemCard
 import com.alejandra.amordepelis.features.movies.presentation.components.MoviesTopHeader
 import com.alejandra.amordepelis.features.movies.presentation.viewmodels.MoviesViewModel
+import com.alejandra.amordepelis.features.lists.presentation.viewmodels.ListsViewModel
+import com.alejandra.amordepelis.core.hardware.ui.rememberShakeDetector
+import com.alejandra.amordepelis.features.movies.domain.entities.Movie
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 
 @Composable
 fun MoviesListScreen(
     viewModel: MoviesViewModel = hiltViewModel(),
+    listsViewModel: ListsViewModel = hiltViewModel(),
     onMovieClick: (String) -> Unit = {},
     onAddMovieClick: () -> Unit = {}
 ) {
     val uiState by viewModel.listUiState.collectAsStateWithLifecycle()
     val announcements by viewModel.announcements.collectAsStateWithLifecycle()
     val currentAnnouncementIndex by viewModel.currentAnnouncementIndex.collectAsStateWithLifecycle()
+    
+    val listMessage by listsViewModel.message.collectAsStateWithLifecycle()
+    val listError by listsViewModel.error.collectAsStateWithLifecycle()
+    val listsUiState by listsViewModel.listsUiState.collectAsStateWithLifecycle()
+    val movieIdPendingAdd by listsViewModel.movieIdPendingAdd.collectAsStateWithLifecycle()
+    val isAddingMovieToList by listsViewModel.isAddingMovieToList.collectAsStateWithLifecycle()
+    val listIdsContainingPendingMovie by listsViewModel.listIdsContainingPendingMovie.collectAsStateWithLifecycle()
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    var shakenRandomMovie by remember { mutableStateOf<Movie?>(null) }
+    val haptic = LocalHapticFeedback.current
 
     LaunchedEffect(Unit) {
         viewModel.loadMovies()
+    }
+
+    LaunchedEffect(listMessage) {
+        listMessage?.let {
+            snackbarHostState.showSnackbar(it, duration = SnackbarDuration.Short)
+            listsViewModel.clearMessage()
+        }
+    }
+
+    LaunchedEffect(listError) {
+        listError?.let {
+            snackbarHostState.showSnackbar(it, duration = SnackbarDuration.Short)
+            listsViewModel.clearError()
+        }
+    }
+
+    rememberShakeDetector(
+        onShake = {
+            if (uiState.movies.isNotEmpty() && shakenRandomMovie == null) {
+                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                shakenRandomMovie = uiState.movies.randomOrNull()
+            }
+        }
+    )
+
+    if (shakenRandomMovie != null) {
+        val movie = shakenRandomMovie!!
+        AlertDialog(
+            onDismissRequest = { shakenRandomMovie = null },
+            title = {
+                Text("¡Película al Azar!", style = MaterialTheme.typography.titleLarge)
+            },
+            text = {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    Text("Has agitado el teléfono. ¿Qué te parece ver:")
+                    Text(
+                        text = movie.title, 
+                        style = MaterialTheme.typography.headlineSmall,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    if (!movie.imageUrl.isNullOrBlank()) {
+                        AsyncImage(
+                            model = movie.imageUrl,
+                            contentDescription = movie.title,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(200.dp),
+                            contentScale = ContentScale.Crop
+                        )
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { 
+                    shakenRandomMovie = null
+                    onMovieClick(movie.id)
+                }) {
+                    Text("Ver Detalles")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { shakenRandomMovie = null }) {
+                    Text("Cancelar")
+                }
+            }
+        )
+    }
+
+    if (movieIdPendingAdd != null) {
+        AlertDialog(
+            onDismissRequest = { listsViewModel.dismissAddMovieToList() },
+            title = { Text("Agregar a una lista") },
+            text = {
+                if (listsUiState.lists.isEmpty()) {
+                    Text("No tienes listas disponibles. Crea una lista primero.")
+                } else {
+                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Text(
+                            text = "Elige la lista donde quieres guardar esta película:",
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        listsUiState.lists.forEach { list ->
+                            val alreadyContains = list.id in listIdsContainingPendingMovie
+                            TextButton(
+                                onClick = { listsViewModel.confirmAddMovieToList(list.id) },
+                                enabled = !isAddingMovieToList && !alreadyContains,
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Text(
+                                    text = if (alreadyContains) "${list.name} (ya agregada)" else list.name,
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                            }
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = { listsViewModel.dismissAddMovieToList() },
+                    enabled = !isAddingMovieToList
+                ) {
+                    Text("Cancelar")
+                }
+            }
+        )
     }
 
     Scaffold(
@@ -63,7 +200,8 @@ fun MoviesListScreen(
                     )
                 }
             }
-        }
+        },
+        snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -123,6 +261,7 @@ fun MoviesListScreen(
                             canMarkAsWatched = uiState.canMarkAsWatched,
                             canAddToList = uiState.canAddToPersonalLists,
                             onMovieClick = { onMovieClick(movie.id) },
+                            onAddToListClick = { listsViewModel.requestAddMovieToList(movie.id) },
                             modifier = Modifier.padding(horizontal = 20.dp)
                         )
                     }

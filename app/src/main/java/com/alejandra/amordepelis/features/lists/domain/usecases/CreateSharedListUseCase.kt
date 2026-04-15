@@ -8,5 +8,7 @@ import javax.inject.Inject
 class CreateSharedListUseCase @Inject constructor(
     private val repository: ListsRepository
 ) {
-    suspend operator fun invoke(roomId: String, params: CreateListParams): SharedList = repository.createSharedList(roomId, params)
+    suspend operator fun invoke(params: CreateListParams): SharedList {
+        return repository.createSharedList(params)
+    }
 }
