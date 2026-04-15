@@ -17,7 +17,7 @@ class AndroidHapticFeedbackManager @Inject constructor(
 ) : HapticFeedbackManager {
 
     companion object {
-        private const val NOTIFICATION_VIBRATION_MS = 200L
+        private const val NOTIFICATION_VIBRATION_MS = 500L
         private const val TAG = "HapticManager"
     }
 

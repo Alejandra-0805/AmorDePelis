@@ -20,7 +20,5 @@ data class HomeUiState(
 data class RecentMovieUiModel(
     val id: String,
     val title: String,
-    val rating: Int,
-    val durationMinutes: Int,
-    val genre: String
+    val imageUrl: String? = null
 )

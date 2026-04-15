@@ -23,7 +23,6 @@ class TokenDataStore @Inject constructor(
     companion object {
         private val TOKEN_KEY = stringPreferencesKey("auth_token")
         private val ROLE_KEY = stringPreferencesKey("user_role")
-        private val ROOM_ID_KEY = stringPreferencesKey("room_id")
     }
 
     val tokenFlow: Flow<String?> = context.dataStore.data.map { preferences ->
@@ -35,10 +34,6 @@ class TokenDataStore @Inject constructor(
         UserRole.fromString(roleString)
     }
 
-    val roomIdFlow: Flow<String?> = context.dataStore.data.map { preferences ->
-        preferences[ROOM_ID_KEY]
-    }
-
     suspend fun saveToken(token: String) {
         context.dataStore.edit { preferences ->
             preferences[TOKEN_KEY] = token
@@ -48,12 +43,6 @@ class TokenDataStore @Inject constructor(
     suspend fun saveRole(role: String) {
         context.dataStore.edit { preferences ->
             preferences[ROLE_KEY] = role
-        }
-    }
-
-    suspend fun saveRoomId(roomId: String) {
-        context.dataStore.edit { preferences ->
-            preferences[ROOM_ID_KEY] = roomId
         }
     }
 
@@ -73,15 +62,10 @@ class TokenDataStore @Inject constructor(
         return UserRole.fromString(roleString)
     }
 
-    suspend fun getRoomId(): String? {
-        return context.dataStore.data.first()[ROOM_ID_KEY]
-    }
-
     suspend fun clearSession() {
         context.dataStore.edit { preferences ->
             preferences.remove(TOKEN_KEY)
             preferences.remove(ROLE_KEY)
-            preferences.remove(ROOM_ID_KEY)
         }
     }
 

@@ -2,12 +2,10 @@ package com.alejandra.amordepelis.features.lists.di
 
 import com.alejandra.amordepelis.features.lists.domain.repositories.ListsRepository
 import com.alejandra.amordepelis.features.lists.domain.usecases.CreateSharedListUseCase
-import com.alejandra.amordepelis.features.lists.domain.usecases.DeleteSharedListUseCase
-import com.alejandra.amordepelis.features.lists.domain.usecases.GetAnnouncementsUseCase
 import com.alejandra.amordepelis.features.lists.domain.usecases.GetSharedListDetailsUseCase
 import com.alejandra.amordepelis.features.lists.domain.usecases.GetSharedListsUseCase
+import com.alejandra.amordepelis.features.lists.domain.usecases.AddMovieToListUseCase
 import com.alejandra.amordepelis.features.lists.domain.usecases.ListsUseCases
-import com.alejandra.amordepelis.features.lists.domain.usecases.UpdateSharedListUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -38,20 +36,8 @@ object ListsUseCaseModule {
 
     @Provides
     @Singleton
-    fun provideUpdateSharedListUseCase(repository: ListsRepository): UpdateSharedListUseCase {
-        return UpdateSharedListUseCase(repository)
-    }
-
-    @Provides
-    @Singleton
-    fun provideDeleteSharedListUseCase(repository: ListsRepository): DeleteSharedListUseCase {
-        return DeleteSharedListUseCase(repository)
-    }
-
-    @Provides
-    @Singleton
-    fun provideGetAnnouncementsUseCase(repository: ListsRepository): GetAnnouncementsUseCase {
-        return GetAnnouncementsUseCase(repository)
+    fun provideAddMovieToListUseCase(repository: ListsRepository): AddMovieToListUseCase {
+        return AddMovieToListUseCase(repository)
     }
 
     @Provides
@@ -60,17 +46,13 @@ object ListsUseCaseModule {
         getSharedListsUseCase: GetSharedListsUseCase,
         getSharedListDetailsUseCase: GetSharedListDetailsUseCase,
         createSharedListUseCase: CreateSharedListUseCase,
-        updateSharedListUseCase: UpdateSharedListUseCase,
-        deleteSharedListUseCase: DeleteSharedListUseCase,
-        getAnnouncementsUseCase: GetAnnouncementsUseCase
+        addMovieToListUseCase: AddMovieToListUseCase
     ): ListsUseCases {
         return ListsUseCases(
             getSharedLists = getSharedListsUseCase,
             getSharedListDetails = getSharedListDetailsUseCase,
             createSharedList = createSharedListUseCase,
-            updateSharedList = updateSharedListUseCase,
-            deleteSharedList = deleteSharedListUseCase,
-            getAnnouncements = getAnnouncementsUseCase
+            addMovieToList = addMovieToListUseCase
         )
     }
 }

@@ -45,8 +45,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.alejandra.amordepelis.core.ui.theme.AppTheme
-import com.alejandra.amordepelis.features.lists.presentation.components.DeleteListDialog
-import com.alejandra.amordepelis.features.lists.presentation.components.EditListDialog
 import com.alejandra.amordepelis.features.lists.presentation.components.ListsHeader
 import com.alejandra.amordepelis.features.lists.presentation.components.SharedListCard
 import com.alejandra.amordepelis.features.lists.presentation.viewmodels.ListsViewModel
@@ -60,8 +58,6 @@ fun ListsScreen(
     onListClick: (String) -> Unit = {}
 ) {
     val uiState by viewModel.listsUiState.collectAsStateWithLifecycle()
-    val editModal by viewModel.editModalUiState.collectAsStateWithLifecycle()
-    val deleteModal by viewModel.deleteModalUiState.collectAsStateWithLifecycle()
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
     val error by viewModel.error.collectAsStateWithLifecycle()
     val message by viewModel.message.collectAsStateWithLifecycle()
@@ -72,7 +68,6 @@ fun ListsScreen(
 
     LaunchedEffect(Unit) {
         viewModel.loadSharedLists()
-        viewModel.loadAnnouncements()
     }
 
     LaunchedEffect(message) {
@@ -177,10 +172,10 @@ fun ListsScreen(
             items(uiState.lists, key = { it.id }) { item ->
                 SharedListCard(
                     item = item,
-                    canEdit = uiState.canEditLists,
-                    canDelete = uiState.canDeleteLists,
-                    onEditClick = { viewModel.openEditModal(item) },
-                    onDeleteClick = { viewModel.openDeleteModal(item) },
+                    canEdit = false,
+                    canDelete = false,
+                    onEditClick = { /* No existe endpoint de editar listas */ },
+                    onDeleteClick = { /* No existe endpoint de eliminar listas */ },
                     onClick = { onListClick(item.id) },
                     modifier = Modifier
                         .padding(horizontal = 20.dp)
@@ -188,25 +183,6 @@ fun ListsScreen(
                 )
             }
         }
-    }
-
-    if (editModal.isVisible) {
-        EditListDialog(
-            name = editModal.name,
-            description = editModal.description,
-            onNameChange = viewModel::onEditNameChange,
-            onDescriptionChange = viewModel::onEditDescriptionChange,
-            onDismiss = viewModel::closeEditModal,
-            onConfirm = viewModel::saveListEdition
-        )
-    }
-
-    if (deleteModal.isVisible) {
-        DeleteListDialog(
-            listName = deleteModal.listName,
-            onDismiss = viewModel::closeDeleteModal,
-            onConfirm = viewModel::deleteList
-        )
     }
 }
 

@@ -15,7 +15,7 @@ object Home
 object Lists
 
 @Serializable
-object ListDetails
+data class ListDetails(val listId: String)
 
 @Serializable
 object AddList
@@ -24,10 +24,13 @@ object AddList
 object Movies
 
 @Serializable
-object MovieDetails
+data class MovieDetails(val movieId: String)
 
 @Serializable
 object AddMovie
 
 @Serializable
 object User
+
+@Serializable
+object AddAnnouncement

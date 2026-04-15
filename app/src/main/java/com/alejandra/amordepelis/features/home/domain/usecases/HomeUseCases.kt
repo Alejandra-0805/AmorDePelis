@@ -3,8 +3,8 @@ package com.alejandra.amordepelis.features.home.domain.usecases
 import javax.inject.Inject
 
 data class HomeUseCases @Inject constructor(
-    val getMetrics: GetMetricsUseCase,
-    val getRecentMovies: GetRecentMoviesUseCase,
-    val getAnnouncements: GetAnnouncementsUseCase,
-    val getLatestNews: GetLatestNewsUseCase
+    val getAllMovies: GetAllMoviesUseCase,
+    val getAllNews: GetAllNewsUseCase,
+    val getLatestNews: GetLatestNewsUseCase,
+    val createAnnouncement: CreateAnnouncementUseCase
 )

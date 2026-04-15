@@ -2,10 +2,9 @@ package com.alejandra.amordepelis.features.user.di
 
 import com.alejandra.amordepelis.features.user.domain.repositories.UserRepository
 import com.alejandra.amordepelis.features.user.domain.usecases.GetUserProfileUseCase
-import com.alejandra.amordepelis.features.user.domain.usecases.SearchUsersByUsernameUseCase
-import com.alejandra.amordepelis.features.user.domain.usecases.SendPartnerInvitationUseCase
 import com.alejandra.amordepelis.features.user.domain.usecases.UpdateUserProfileUseCase
 import com.alejandra.amordepelis.features.user.domain.usecases.DeleteUserUseCase
+import com.alejandra.amordepelis.features.user.domain.usecases.JoinVirtualRoomUseCase
 import com.alejandra.amordepelis.features.user.domain.usecases.UserUseCases
 import dagger.Module
 import dagger.Provides
@@ -25,18 +24,6 @@ object UserUseCaseModule {
 
     @Provides
     @Singleton
-    fun provideSearchUsersByUsernameUseCase(repository: UserRepository): SearchUsersByUsernameUseCase {
-        return SearchUsersByUsernameUseCase(repository)
-    }
-
-    @Provides
-    @Singleton
-    fun provideSendPartnerInvitationUseCase(repository: UserRepository): SendPartnerInvitationUseCase {
-        return SendPartnerInvitationUseCase(repository)
-    }
-
-    @Provides
-    @Singleton
     fun provideUpdateUserProfileUseCase(repository: UserRepository): UpdateUserProfileUseCase {
         return UpdateUserProfileUseCase(repository)
     }
@@ -49,24 +36,20 @@ object UserUseCaseModule {
 
     @Provides
     @Singleton
-    fun provideJoinVirtualRoomUseCase(repository: UserRepository): com.alejandra.amordepelis.features.user.domain.usecases.JoinVirtualRoomUseCase {
-        return com.alejandra.amordepelis.features.user.domain.usecases.JoinVirtualRoomUseCase(repository)
+    fun provideJoinVirtualRoomUseCase(repository: UserRepository): JoinVirtualRoomUseCase {
+        return JoinVirtualRoomUseCase(repository)
     }
 
     @Provides
     @Singleton
     fun provideUserUseCases(
         getUserProfileUseCase: GetUserProfileUseCase,
-        searchUsersByUsernameUseCase: SearchUsersByUsernameUseCase,
-        sendPartnerInvitationUseCase: SendPartnerInvitationUseCase,
         updateUserProfileUseCase: UpdateUserProfileUseCase,
         deleteUserUseCase: DeleteUserUseCase,
-        joinVirtualRoomUseCase: com.alejandra.amordepelis.features.user.domain.usecases.JoinVirtualRoomUseCase
+        joinVirtualRoomUseCase: JoinVirtualRoomUseCase
     ): UserUseCases {
         return UserUseCases(
             getUserProfile = getUserProfileUseCase,
-            searchUsersByUsername = searchUsersByUsernameUseCase,
-            sendPartnerInvitation = sendPartnerInvitationUseCase,
             updateUserProfile = updateUserProfileUseCase,
             deleteUser = deleteUserUseCase,
             joinVirtualRoom = joinVirtualRoomUseCase
