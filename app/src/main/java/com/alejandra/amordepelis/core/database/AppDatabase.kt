@@ -1,6 +1,7 @@
 package com.alejandra.amordepelis.core.database
 
 import androidx.room.Database
+import androidx.room.RoomDatabase
 import com.alejandra.amordepelis.core.database.dao.ListDao
 import com.alejandra.amordepelis.core.database.dao.ListMovieDao
 import com.alejandra.amordepelis.core.database.dao.MovieDao
@@ -19,7 +20,7 @@ import com.alejandra.amordepelis.core.database.entities.ListMovieEntity
                         ListMovieEntity::class,
                         MovieEntity::class
                      ], version = 1, exportSchema = false)
-abstract class AppDatabase {
+abstract class AppDatabase : RoomDatabase() {
     abstract fun userDao(): UserDao
     abstract fun productDao(): ProductDao
     abstract fun listDao(): ListDao
