@@ -4,7 +4,7 @@ import androidx.room.Dao
 import androidx.room.Query
 
 @Dao
-interface ProductEntity {
+interface ProductDao {
     @Query("SELECT * FROM products")
-    fun getAllProducts(): List<ProductEntity>
+    fun getAllProducts(): List<ProductDao>
 }
