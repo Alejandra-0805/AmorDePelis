@@ -74,11 +74,13 @@ dependencies {
     // Retrofit & OkHttp
     implementation(libs.retrofit.core)
     implementation(libs.retrofit.gson)
+
     // Lifecycle ViewModel Compose
     implementation(libs.androidx.lifecycle.viewmodel.compose)
 
     // DataStore
     implementation(libs.androidx.datastore.preferences)
+
     // Hilt
     implementation(libs.hilt.android)
     implementation(libs.hilt.navigation.compose)
@@ -87,6 +89,11 @@ dependencies {
 
     // Biometric
     implementation(libs.androidx.biometric)
+
+    // Room
+    implementation(libs.room.runtime)
+    implementation(libs.room.ktx)
+    ksp(libs.room.compiler)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
