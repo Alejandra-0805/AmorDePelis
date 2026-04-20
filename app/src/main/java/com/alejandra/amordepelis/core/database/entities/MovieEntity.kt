@@ -9,5 +9,5 @@ data class MovieEntity(
     val titulo: String,
     val sinopsis: String,
     val duracion: Int,
-    val imagenUrl: String
+    val imageUrl: String
 )
