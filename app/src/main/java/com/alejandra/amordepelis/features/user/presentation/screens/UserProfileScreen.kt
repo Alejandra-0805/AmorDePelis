@@ -76,12 +76,12 @@ fun UserProfileScreen(
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
-        snackbarHost = { SnackbarHost(snackbarHostState) }
-    ) { innerPadding ->
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        contentWindowInsets = androidx.compose.foundation.layout.WindowInsets(0, 0, 0, 0)
+    ) { _ ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding)
                 .padding(bottom = 20.dp) // extra space at bottom
                 .verticalScroll(rememberScrollState())
         ) {

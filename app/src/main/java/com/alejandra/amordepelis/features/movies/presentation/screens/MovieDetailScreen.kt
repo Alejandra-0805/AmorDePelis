@@ -57,11 +57,10 @@ fun MovieDetailScreen(
 
     val movie = listState.movies.find { it.id.toString() == movieId }
 
-    Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+    Scaffold(modifier = Modifier.fillMaxSize(), contentWindowInsets = androidx.compose.foundation.layout.WindowInsets(0, 0, 0, 0)) { _ ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding)
         ) {
             MoviesTopHeader(
                 title = "Nuestra Cartelera",
