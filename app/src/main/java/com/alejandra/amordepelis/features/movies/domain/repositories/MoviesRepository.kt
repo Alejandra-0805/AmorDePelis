@@ -66,6 +66,19 @@ interface MoviesRepository {
     ): Movie
 
     /**
+     * Añade una nueva película con imagen al catálogo remoto y la cachea localmente.
+     * Acepta tags como String separados por coma (formato del API).
+     * Requiere conectividad; lanza excepción si no hay red.
+     */
+    suspend fun addMovieWithImage(
+        title: String,
+        synopsis: String?,
+        durationMinutes: Int?,
+        tags: String?,
+        imageFile: java.io.File?
+    ): Movie
+
+    /**
      * Sincroniza las películas del servidor hacia Room.
      *
      * Flujo interno:

@@ -1,4 +1,5 @@
-﻿
+﻿Starting a Gradle Daemon, 1 busy and 3 incompatible and 6 stopped Daemons could not be reused, use --status for details
+
 > Configure project :app
 WARNING: The option setting 'android.disallowKotlinSourceSets=false' is experimental.
 The current default is 'true'.
@@ -12,7 +13,7 @@ Kotlin does not yet support 25 JDK target, falling back to Kotlin JVM_24 JVM tar
 > Task :app:parseDebugLocalResources UP-TO-DATE
 > Task :app:generateDebugRFile UP-TO-DATE
 
-> Task :app:kspDebugKotlin
+> Task :app:kspDebugKotlin UP-TO-DATE
 Kotlin does not yet support 25 JDK target, falling back to Kotlin JVM_24 JVM target
 Kotlin does not yet support 25 JDK target, falling back to Kotlin JVM_24 JVM target
 
@@ -60,10 +61,15 @@ w: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/mai
 w: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/lists/presentation/screens/ListDetailsScreen.kt:60:33 'fun <reified VM : ViewModel> hiltViewModel(viewModelStoreOwner: ViewModelStoreOwner = ..., key: String? = ...): VM' is deprecated. Moved to package: androidx.hilt.lifecycle.viewmodel.compose.
 w: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/lists/presentation/screens/ListsScreen.kt:56:33 'fun <reified VM : ViewModel> hiltViewModel(viewModelStoreOwner: ViewModelStoreOwner = ..., key: String? = ...): VM' is deprecated. Moved to package: androidx.hilt.lifecycle.viewmodel.compose.
 w: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/components/MovieListItemCard.kt:161:64 'val Icons.Filled.PlaylistAdd: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Filled.PlaylistAdd.
-w: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:60:34 'fun <reified VM : ViewModel> hiltViewModel(viewModelStoreOwner: ViewModelStoreOwner = ..., key: String? = ...): VM' is deprecated. Moved to package: androidx.hilt.lifecycle.viewmodel.compose.
+w: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:65:36 'fun <reified VM : ViewModel> hiltViewModel(viewModelStoreOwner: ViewModelStoreOwner = ..., key: String? = ...): VM' is deprecated. Moved to package: androidx.hilt.lifecycle.viewmodel.compose.
 w: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/MovieDetailScreen.kt:51:34 'fun <reified VM : ViewModel> hiltViewModel(viewModelStoreOwner: ViewModelStoreOwner = ..., key: String? = ...): VM' is deprecated. Moved to package: androidx.hilt.lifecycle.viewmodel.compose.
 w: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/MoviesListScreen.kt:60:34 'fun <reified VM : ViewModel> hiltViewModel(viewModelStoreOwner: ViewModelStoreOwner = ..., key: String? = ...): VM' is deprecated. Moved to package: androidx.hilt.lifecycle.viewmodel.compose.
 w: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/MoviesListScreen.kt:61:38 'fun <reified VM : ViewModel> hiltViewModel(viewModelStoreOwner: ViewModelStoreOwner = ..., key: String? = ...): VM' is deprecated. Moved to package: androidx.hilt.lifecycle.viewmodel.compose.
+w: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/viewmodels/AddMovieViewModel.kt:39:5 This annotation is currently applied to the value parameter only, but in the future it will also be applied to field.
+- To opt in to applying to both value parameter and field, add '-Xannotation-default-target=param-property' to your compiler arguments.
+- To keep applying to the value parameter only, use the '@param:' annotation target.
+
+See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
 w: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/viewmodels/MoviesViewModel.kt:36:5 This annotation is currently applied to the value parameter only, but in the future it will also be applied to field.
 - To opt in to applying to both value parameter and field, add '-Xannotation-default-target=param-property' to your compiler arguments.
 - To keep applying to the value parameter only, use the '@param:' annotation target.
@@ -72,7 +78,8 @@ See https://youtrack.jetbrains.com/issue/KT-73255 for more details.
 w: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/user/data/repositories/UserRepositoryImpl.kt:72:41 Condition is always 'true'.
 w: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/user/data/repositories/UserRepositoryImpl.kt:81:21 Condition is always 'true'.
 w: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/user/presentation/screens/UserProfileScreen.kt:48:32 'fun <reified VM : ViewModel> hiltViewModel(viewModelStoreOwner: ViewModelStoreOwner = ..., key: String? = ...): VM' is deprecated. Moved to package: androidx.hilt.lifecycle.viewmodel.compose.
+w: Detected multiple Kotlin daemon sessions at 
 
-BUILD SUCCESSFUL in 1m 25s
-7 actionable tasks: 2 executed, 5 up-to-date
+BUILD SUCCESSFUL in 2m 42s
+7 actionable tasks: 1 executed, 6 up-to-date
 Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.1.0/userguide/configuration_cache_enabling.html
