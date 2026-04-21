@@ -1,5 +1,6 @@
 package com.alejandra.amordepelis.features.home.data.repositories
 
+import android.util.Log
 import com.alejandra.amordepelis.core.database.dao.MovieDao
 import com.alejandra.amordepelis.features.home.data.datasources.remote.api.HomeApi
 import com.alejandra.amordepelis.features.home.data.datasources.remote.mapper.toDomain
@@ -49,8 +50,9 @@ class HomeRepositoryImpl @Inject constructor(
     override suspend fun syncMovies() {
         try {
             val movies = api.getAllMovies()
+            //dao.insertMovies(movies.map { it.toDomain() })
         }catch (e: Exception) {
-
+            Log.e("HomeRepositoryImpl", "Error syncing movies", e)
         }
     }
 }

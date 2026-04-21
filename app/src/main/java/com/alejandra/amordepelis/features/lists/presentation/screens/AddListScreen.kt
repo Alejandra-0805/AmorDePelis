@@ -88,9 +88,11 @@ fun AddListScreen(
             AddListFormCard(
                 name = uiState.name,
                 description = uiState.description,
+                colorHex = uiState.colorHex,
                 isLoading = uiState.isLoading,
                 onNameChange = viewModel::onNewListNameChange,
                 onDescriptionChange = viewModel::onNewListDescriptionChange,
+                onColorChange = viewModel::onColorChange,
                 onSaveClick = viewModel::createList,
                 modifier = Modifier.padding(horizontal = 20.dp)
             )
@@ -114,9 +116,11 @@ private fun AddListScreenPreview() {
             AddListFormCard(
                 name = "",
                 description = "",
+                colorHex = "#3B82F6",
                 isLoading = false,
                 onNameChange = {},
                 onDescriptionChange = {},
+                onColorChange = {},
                 onSaveClick = {},
                 modifier = Modifier.padding(horizontal = 20.dp)
             )

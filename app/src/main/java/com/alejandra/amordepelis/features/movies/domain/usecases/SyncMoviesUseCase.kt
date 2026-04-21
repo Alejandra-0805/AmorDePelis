@@ -1,13 +1,13 @@
 package com.alejandra.amordepelis.features.movies.domain.usecases
 
-import com.alejandra.amordepelis.features.movies.domain.entities.Movie
 import com.alejandra.amordepelis.features.movies.domain.repositories.MoviesRepository
 import javax.inject.Inject
 
-class GetMovieDetailsUseCase @Inject constructor(
+class SyncMoviesUseCase @Inject constructor(
     private val repository: MoviesRepository
 ) {
-    suspend operator fun invoke(id: Int): Movie {
-        return repository.getMovieDetails(id)
+    suspend operator fun invoke(): Result<Unit> {
+        repository.syncMovies()
+        return Result.success(Unit)
     }
 }

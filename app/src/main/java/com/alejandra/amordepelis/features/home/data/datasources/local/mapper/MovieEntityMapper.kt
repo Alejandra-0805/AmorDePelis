@@ -6,4 +6,4 @@ import com.alejandra.amordepelis.features.home.domain.entities.Movie
 
 fun MovieEntity.toDomain() = Movie(id.toString(), titulo, sinopsis)
 
-fun MovieEntity.toDto() = MovieDto(id.toString(), titulo, siranopsis)
+fun MovieEntity.toDto() = MovieDto(id.toString(), titulo, rating, duracion, genre, imageUrl)

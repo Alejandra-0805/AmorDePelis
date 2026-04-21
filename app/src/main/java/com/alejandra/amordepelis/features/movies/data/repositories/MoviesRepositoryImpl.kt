@@ -1,5 +1,6 @@
 package com.alejandra.amordepelis.features.movies.data.repositories
 
+import android.util.Log
 import com.alejandra.amordepelis.features.movies.data.datasources.remote.api.MoviesApi
 import com.alejandra.amordepelis.features.movies.data.datasources.remote.mapper.toDomain
 import com.alejandra.amordepelis.features.movies.domain.entities.Movie
@@ -14,7 +15,15 @@ class MoviesRepositoryImpl @Inject constructor(
     private val moviesApi: MoviesApi
 ) : MoviesRepository {
     override suspend fun getMovies(): List<Movie> {
-        return moviesApi.getMovies().map { it.toDomain() }
+        val movies = moviesApi.getMovies().map { it.toDomain() }
+        Log.d("MoviesRepositoryImpl", "Movies: $movies")
+        return movies
+    }
+
+    override suspend fun getMovieDetails(id: Int): Movie {
+        val movie = moviesApi.getMovieDetails(id).toDomain()
+        Log.d("MoviesRepositoryImpl", "Movie details: $movie")
+        return movie
     }
 
     override suspend fun searchMovies(title: String): List<Movie> {
@@ -45,5 +54,14 @@ class MoviesRepositoryImpl @Inject constructor(
             tags = tagsBody,
             image = imagePart
         ).toDomain()
+    }
+
+    override suspend fun syncMovies() {
+        try {
+            val movies = moviesApi.getMovies()
+            Log.d("MoviesRepositoryImpl", "Movies from API: $movies")
+        } catch (e: Exception) {
+            Log.e("MoviesRepositoryImpl", "Error syncing movies: ${e.message}")
+        }
     }
 }

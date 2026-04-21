@@ -7,6 +7,7 @@ import com.alejandra.amordepelis.core.storage.UserRole
 import com.alejandra.amordepelis.features.movies.domain.usecases.MoviesUseCases
 import com.alejandra.amordepelis.features.movies.presentation.screens.Announcement
 import com.alejandra.amordepelis.features.movies.presentation.screens.MoviesListUiState
+import com.alejandra.amordepelis.features.movies.presentation.states.MovieDetailsUiState
 import com.alejandra.amordepelis.core.hardware.domain.HapticFeedbackManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -42,6 +43,9 @@ class MoviesViewModel @Inject constructor(
 
     private val _listUiState = MutableStateFlow(MoviesListUiState())
     val listUiState: StateFlow<MoviesListUiState> = _listUiState.asStateFlow()
+
+    private val _detailsUiState = MutableStateFlow(MovieDetailsUiState())
+    val detailsUiState: StateFlow<MovieDetailsUiState> = _detailsUiState.asStateFlow()
 
     private val _announcements = MutableStateFlow<List<Announcement>>(emptyList())
     val announcements: StateFlow<List<Announcement>> = _announcements.asStateFlow()
@@ -127,6 +131,21 @@ class MoviesViewModel @Inject constructor(
                 .onFailure { throwable ->
                     _listUiState.update {
                         it.copy(isLoading = false, error = throwable.message ?: "Error searching movies")
+                    }
+                }
+        }
+    }
+
+    fun loadMovieDetails(movieId: Int) {
+        viewModelScope.launch {
+            _detailsUiState.update { it.copy(isLoading = true, error = null) }
+            runCatching { useCases.getMovieDetails(movieId) }
+                .onSuccess { movie ->
+                    _detailsUiState.update { it.copy(isLoading = false, movie = movie) }
+                }
+                .onFailure { throwable ->
+                    _detailsUiState.update {
+                        it.copy(isLoading = false, error = throwable.message ?: "Error loading movie details")
                     }
                 }
         }
