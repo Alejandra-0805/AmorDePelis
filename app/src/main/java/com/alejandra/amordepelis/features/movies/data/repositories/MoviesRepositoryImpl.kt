@@ -98,7 +98,19 @@ class MoviesRepositoryImpl @Inject constructor(
         Log.d(TAG, "Película añadida y cacheada: ${movie.title}")
         movie
     }
-  private suspend fun filterLocalMovies(query: String): List<Movie> =
+    /**
+     * Alias de addMovie requerido por CreateMovieWithImageUseCase.
+     * Delega a la misma pipeline remote + cache local.
+     */
+    override suspend fun addMovieWithImage(
+        title: String,
+        synopsis: String?,
+        durationMinutes: Int?,
+        tags: String?,
+        imageFile: File?
+    ): Movie = addMovie(title, synopsis, durationMinutes, tags, imageFile)
+
+    private suspend fun filterLocalMovies(query: String): List<Movie> =
         localMovieDataSource.getAllMovies().filter { movie ->
             movie.title.contains(query, ignoreCase = true) ||
                 movie.synopsis?.contains(query, ignoreCase = true) == true

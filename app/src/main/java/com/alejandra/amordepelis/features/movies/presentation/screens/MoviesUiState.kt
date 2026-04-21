@@ -44,19 +44,31 @@ data class MovieDetailsUiState(
 /**
  * Estado del formulario de agregar película.
  * Nota: separado de [MoviesListUiState] siguiendo Single Responsibility.
+ *
+ * Los campos de texto se almacenan como String para facilitar el binding
+ * con OutlinedTextField (la conversión numérica se hace en el ViewModel).
  */
 data class AddMovieUiState(
     val title: String = "Agregar película",
+    // Campos del formulario
     val movieTitle: String = "",
     val synopsis: String = "",
-    val genre: String = "",
     val durationMinutes: String = "",
+    val tagsInput: String = "",        // Tags separados por coma, ej. "Acción, Drama"
+    val imageUri: String? = null,      // URI de la imagen seleccionada
+    // Errores de validación por campo
+    val titleError: String? = null,
+    val durationError: String? = null,
+    // Campos heredados (usados por MoviesViewModel legacy)
+    val genre: String = "",
     val rating: Int = 0,
     val isFavorite: Boolean = false,
+    // Estado de la operación
     val isLoading: Boolean = false,
     val isSaved: Boolean = false,
     val error: String? = null
 )
+
 
 data class Announcement(
     val id: String,

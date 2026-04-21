@@ -99,6 +99,7 @@ fun MoviesListScreen(
     }
 
     rememberShakeDetector(
+        manager = viewModel.accelerometerManager,
         onShake = {
             if (uiState.movies.isNotEmpty() && shakenRandomMovie == null) {
                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)

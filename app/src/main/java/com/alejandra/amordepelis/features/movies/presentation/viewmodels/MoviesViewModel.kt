@@ -5,6 +5,8 @@ import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.alejandra.amordepelis.core.hardware.domain.AccelerometerManager
+import com.alejandra.amordepelis.core.hardware.domain.CameraManager
 import com.alejandra.amordepelis.core.hardware.domain.HapticFeedbackManager
 import com.alejandra.amordepelis.core.network.connectivity.ConnectivityManager
 import com.alejandra.amordepelis.core.storage.SessionManager
@@ -32,7 +34,9 @@ class MoviesViewModel @Inject constructor(
     private val sessionManager: SessionManager,
     private val connectivityManager: ConnectivityManager,
     @ApplicationContext private val context: Context,
-    private val hapticFeedbackManager: HapticFeedbackManager
+    private val hapticFeedbackManager: HapticFeedbackManager,
+    private val cameraManager: CameraManager,
+    val accelerometerManager: AccelerometerManager
 ) : ViewModel() {
 
     companion object {
@@ -220,6 +224,14 @@ class MoviesViewModel @Inject constructor(
     fun updateAddMovieImageUri(uri: String?) {
         // El AddMovieUiState no tiene imageUri; manejar en la pantalla si se necesita.
     }
+
+    // ── Cámara ─────────────────────────────────────────────────────────────────
+
+    /** Crea un URI temporal para la cámara. Devuelve null si FileProvider falla. */
+    fun createCameraUri(): Uri? = cameraManager.createTempCameraUri()
+
+    /** Comprueba si el permiso de cámara está concedido. */
+    fun hasCameraPermission(): Boolean = cameraManager.hasCameraPermission()
 
     fun updateAddMovieRating(rating: Int) {
         _addMovieUiState.update { it.copy(rating = rating) }
