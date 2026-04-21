@@ -1,5 +1,7 @@
 package com.alejandra.amordepelis.features.home.data.repositories
 
+import android.util.Log
+import com.alejandra.amordepelis.core.database.dao.MovieDao
 import com.alejandra.amordepelis.features.home.data.datasources.remote.api.HomeApi
 import com.alejandra.amordepelis.features.home.data.datasources.remote.mapper.toDomain
 import com.alejandra.amordepelis.features.home.data.datasources.remote.mapper.toAnnouncementDomainList
@@ -15,7 +17,8 @@ import java.io.File
 import javax.inject.Inject
 
 class HomeRepositoryImpl @Inject constructor(
-    private val api: HomeApi
+    private val api: HomeApi,
+    private val dao: MovieDao
 ) : HomeRepository {
 
     override suspend fun getAllMovies(): List<Movie> {
@@ -42,5 +45,14 @@ class HomeRepositoryImpl @Inject constructor(
             MultipartBody.Part.createFormData("image", file.name, reqFile)
         }
         return api.addNews(titleBody, contentBody, imagePart).toDomain()
+    }
+
+    override suspend fun syncMovies() {
+        try {
+            val movies = api.getAllMovies()
+            //dao.insertMovies(movies.map { it.toDomain() })
+        }catch (e: Exception) {
+            Log.e("HomeRepositoryImpl", "Error syncing movies", e)
+        }
     }
 }

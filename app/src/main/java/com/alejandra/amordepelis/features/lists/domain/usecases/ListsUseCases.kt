@@ -6,5 +6,6 @@ data class ListsUseCases @Inject constructor(
     val getSharedLists: GetSharedListsUseCase,
     val getSharedListDetails: GetSharedListDetailsUseCase,
     val createSharedList: CreateSharedListUseCase,
-    val addMovieToList: AddMovieToListUseCase
+    val addMovieToList: AddMovieToListUseCase,
+    val getListDetailsUseCase: GetListDetailsUseCase
 )

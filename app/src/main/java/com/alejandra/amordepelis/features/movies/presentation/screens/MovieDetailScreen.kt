@@ -33,6 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -42,20 +43,21 @@ import coil.compose.AsyncImage
 import com.alejandra.amordepelis.core.ui.theme.AppTheme
 import com.alejandra.amordepelis.features.movies.presentation.components.MoviesTopHeader
 import com.alejandra.amordepelis.features.movies.presentation.viewmodels.MoviesViewModel
+import com.alejandra.amordepelis.features.movies.presentation.states.MovieDetailsUiState
 
 @Composable
 fun MovieDetailScreen(
     movieId: String,
     viewModel: MoviesViewModel = hiltViewModel()
 ) {
-    val listState by viewModel.listUiState.collectAsStateWithLifecycle()
+    val detailsState by viewModel.detailsUiState.collectAsStateWithLifecycle()
 
-    // Carga la lista de películas al entrar (para encontrar la película por ID)
+    // Carga los detalles de la película al entrar
     LaunchedEffect(movieId) {
-        viewModel.loadMovies()
+        viewModel.loadMovieDetails(movieId.toIntOrNull() ?: return@LaunchedEffect)
     }
 
-    val movie = listState.movies.find { it.id.toString() == movieId }
+    val movie = detailsState.movie
 
     Scaffold(modifier = Modifier.fillMaxSize(), contentWindowInsets = androidx.compose.foundation.layout.WindowInsets(0, 0, 0, 0)) { _ ->
         Column(
@@ -67,13 +69,34 @@ fun MovieDetailScreen(
                 subtitle = "Persona 1 & Persona 2"
             )
 
-            if (listState.isLoading) {
+            if (detailsState.isLoading) {
                 Column(
                     modifier = Modifier.fillMaxSize(),
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+                }
+            } else if (detailsState.error != null) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(32.dp),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Info,
+                        contentDescription = null,
+                        modifier = Modifier.size(48.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Text(
+                        text = detailsState.error ?: "Error al cargar la película",
+                        style = MaterialTheme.typography.titleLarge,
+                        textAlign = TextAlign.Center
+                    )
                 }
             } else if (movie != null) {
                 Column(
@@ -158,8 +181,9 @@ fun MovieDetailScreen(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.fillMaxWidth()
                     ) {
+                        val rating = movie.averageRating?.toInt() ?: 0
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            repeat(4) {
+                            repeat(rating) {
                                 Icon(
                                     imageVector = Icons.Default.Star,
                                     contentDescription = null,
@@ -167,15 +191,17 @@ fun MovieDetailScreen(
                                     modifier = Modifier.size(16.dp)
                                 )
                             }
-                            Icon(
-                                imageVector = Icons.Outlined.StarOutline,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.size(16.dp)
-                            )
+                            repeat(5 - rating) {
+                                Icon(
+                                    imageVector = Icons.Outlined.StarOutline,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                            }
                             Spacer(modifier = Modifier.width(4.dp))
                             Text(
-                                text = "4",
+                                text = "${movie.ratingCount} valoraciones",
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -187,30 +213,41 @@ fun MovieDetailScreen(
                         )
                         Spacer(modifier = Modifier.width(16.dp))
 
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                imageVector = Icons.Default.Schedule,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.size(16.dp)
-                            )
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text(
-                                text = "127m",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
+                        if (movie.durationMinutes != null) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    imageVector = Icons.Default.Schedule,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(
+                                    text = "${movie.durationMinutes} min",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
                         }
                     }
 
                     Spacer(modifier = Modifier.height(20.dp))
 
-                    Text(
-                        text = "Lorem ipsum dolor sit amet consectetur adipiscing elit Ut et massa mi. Aliquam in hendrerit enet ue consectetur adipiscing alio elit Ut et massa mi. Aliquam in hendrerit vue.",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        lineHeight = MaterialTheme.typography.bodyLarge.lineHeight * 1.2
-                    )
+                    if (!movie.synopsis.isNullOrBlank()) {
+                        Text(
+                            text = movie.synopsis,
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            lineHeight = MaterialTheme.typography.bodyLarge.lineHeight * 1.2
+                        )
+                    } else {
+                        Text(
+                            text = "Sin sinopsis disponible",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            fontStyle = FontStyle.Italic
+                        )
+                    }
 
                     Spacer(modifier = Modifier.height(32.dp))
                 }

@@ -1,5 +1,7 @@
 package com.alejandra.amordepelis.features.user.data.repositories
 
+import android.util.Base64
+import android.util.Log
 import com.alejandra.amordepelis.core.storage.TokenProvider
 import com.alejandra.amordepelis.features.user.data.datasources.remote.api.UserApi
 import com.alejandra.amordepelis.features.user.data.datasources.remote.mapper.toDomain
@@ -9,7 +11,6 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONObject
 import javax.inject.Inject
-import android.util.Base64
 
 class UserRepositoryImpl @Inject constructor(
     private val userApi: UserApi,
@@ -46,7 +47,12 @@ class UserRepositoryImpl @Inject constructor(
                         val partnerDto = userApi.getUserProfile(partnerId)
                         partnerUsernameFromRoom = partnerDto.username
                         partnerEmailFromRoom = partnerDto.email
+                        Log.d("UserRepositoryImpl", "Partner fetched - username: '${partnerDto.username}', email: '${partnerDto.email}'")
+                        if (partnerDto.username.isNullOrBlank()) {
+                            Log.w("UserRepositoryImpl", "Partner username is empty! Will use email as fallback")
+                        }
                     } catch (e: Exception) {
+                        Log.e("UserRepositoryImpl", "Error fetching partner profile: ${e.message}")
                         e.printStackTrace()
                     }
                 }
@@ -60,10 +66,17 @@ class UserRepositoryImpl @Inject constructor(
 
         // Si el DTO original no trajo pareja, pero por salas descubrimos que sí la tiene, la mapeamos forzadamente
         if (profile.partner == null && hasPartnerFromRoom) {
+            // Usamos el username si existe, de lo contrario usamos el email, y como último recurso un valor por defecto
+            val displayName = partnerUsernameFromRoom?.takeIf { it.isNotBlank() }
+                ?: partnerEmailFromRoom?.takeIf { it.isNotBlank() }
+                ?: "Pareja vinculada"
+            
+            Log.d("UserRepositoryImpl", "Creating partner with displayName: '$displayName' (username: '$partnerUsernameFromRoom', email: '$partnerEmailFromRoom')")
+            
             return profile.copy(
                 partner = com.alejandra.amordepelis.features.user.domain.entities.PartnerProfile(
                     id = if (userProfileDto.id == 0) "0" else "999", // Un id de respaldo si es necesario
-                    username = partnerUsernameFromRoom ?: "Pareja vinculada",
+                    username = displayName,
                     email = partnerEmailFromRoom ?: "..."
                 )
             )

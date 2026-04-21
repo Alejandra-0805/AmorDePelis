@@ -18,6 +18,7 @@ fun UserProfileDto.toDomain(roomName: String? = null, ownInviteCode: String? = n
             )
         },
         roomName = roomName,
-        ownInviteCode = ownInviteCode
+        ownInviteCode = ownInviteCode,
+        role = role ?: ""
     )
 }

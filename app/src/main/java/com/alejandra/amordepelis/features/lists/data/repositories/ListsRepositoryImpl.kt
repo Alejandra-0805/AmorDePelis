@@ -18,9 +18,8 @@ class ListsRepositoryImpl @Inject constructor(
         return listsApi.getRoomLists(roomId).map { it.toDomain() }
     }
 
-    override suspend fun getSharedListDetails(roomId: Int, listId: Int, listName: String): SharedListDetails {
-        val movies = listsApi.getListMovies(roomId, listId)
-        return movies.toSharedListDetails(listId.toString(), listName)
+    override suspend fun getSharedListDetails(roomId: Int, listId: Int): SharedListDetails {
+        return listsApi.getListDetails(roomId, listId).toDomain()
     }
 
     override suspend fun createSharedList(params: CreateListParams): SharedList {

@@ -9,6 +9,10 @@ fun MovieDto.toDomain(): Movie {
         title = title,
         synopsis = synopsis,
         imageUrl = imageUrl,
-        tags = tags.map { it.name }
+        tags = tags.map { it.name },
+        durationMinutes = durationMinutes,
+        averageRating = averageRating,
+        ratingCount = ratingCount,
+        isFavorite = isFavorite
     )
 }
