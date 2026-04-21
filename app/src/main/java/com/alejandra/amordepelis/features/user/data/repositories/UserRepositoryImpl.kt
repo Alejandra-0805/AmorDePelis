@@ -2,11 +2,16 @@ package com.alejandra.amordepelis.features.user.data.repositories
 
 import android.util.Base64
 import android.util.Log
+import com.alejandra.amordepelis.core.network.connectivity.ConnectivityManager
+import com.alejandra.amordepelis.core.storage.SessionManager
 import com.alejandra.amordepelis.core.storage.TokenProvider
+import com.alejandra.amordepelis.features.user.data.datasources.local.LocalUserDataSource
 import com.alejandra.amordepelis.features.user.data.datasources.remote.api.UserApi
 import com.alejandra.amordepelis.features.user.data.datasources.remote.mapper.toDomain
+import com.alejandra.amordepelis.features.user.domain.entities.PartnerProfile
 import com.alejandra.amordepelis.features.user.domain.entities.UserProfile
 import com.alejandra.amordepelis.features.user.domain.repositories.UserRepository
+import com.alejandra.amordepelis.features.user.data.datasources.remote.model.JoinRoomRequestDto
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONObject
@@ -14,75 +19,110 @@ import javax.inject.Inject
 
 class UserRepositoryImpl @Inject constructor(
     private val userApi: UserApi,
-    private val tokenProvider: TokenProvider
+    private val tokenProvider: TokenProvider,
+    private val sessionManager: SessionManager,
+    private val localUserDataSource: LocalUserDataSource,
+    private val connectivityManager: ConnectivityManager
 ) : UserRepository {
+
+    companion object {
+        private const val TAG = "UserRepositoryImpl"
+    }
+
     override suspend fun getUserProfile(): UserProfile {
-        val token = tokenProvider.getToken() ?: throw Exception("No token available")
-        val userId = getUserIdFromToken(token) ?: throw Exception("Invalid token or missing ID")
-        
-        val userProfileDto = userApi.getUserProfile(userId)
-        
+        val token = tokenProvider.getToken() ?: throw Exception("No hay sesión activa")
+        val userId = getUserIdFromToken(token)
+
+        val cachedProfile = if (userId != null) {
+            localUserDataSource.getProfileById(userId)
+        } else {
+            localUserDataSource.getFirstCachedProfile()
+        }
+
+        if (cachedProfile != null) {
+            Log.d(TAG, "Perfil obtenido desde cache local (userId=$userId)")
+            if (connectivityManager.isNetworkAvailable()) {
+                refreshProfileInBackground(userId)
+            }
+            return cachedProfile
+        }
+
+        if (!connectivityManager.isNetworkAvailable()) {
+            throw Exception("Sin conexión y sin datos guardados. Conéctate para cargar tu perfil.")
+        }
+
+        return fetchAndCacheProfile(userId)
+    }
+
+    private suspend fun fetchAndCacheProfile(userId: Int?): UserProfile {
+        val resolvedUserId = userId
+            ?: throw Exception("No se pudo determinar el ID de usuario desde el token.")
+
+        val userProfileDto = userApi.getUserProfile(resolvedUserId)
+
         var roomName: String? = null
         var ownInviteCode: String? = null
         var hasPartnerFromRoom = false
         var partnerUsernameFromRoom: String? = null
         var partnerEmailFromRoom: String? = null
-        
+
         try {
             val rooms = userApi.getUserRooms()
             if (rooms.isNotEmpty()) {
-                // Buscamos primero la sala que esté vinculada (donde haya creator y guest).
-                val room = rooms.find { it.creatorId != null && it.guestId != null } ?: rooms.first()
-                
+                val room = rooms.find { it.creatorId != null && it.guestId != null }
+                    ?: rooms.first()
+
                 roomName = room.roomName
                 ownInviteCode = room.invitationCode
-                
-                // Si la sala tiene ambos (creador e invitado), detectamos que hay un partner.
+
+                sessionManager.saveRoomId(room.id)
+                Log.d(TAG, "RoomId persistido: ${room.id}")
+
                 if (room.creatorId != null && room.guestId != null) {
                     hasPartnerFromRoom = true
-                    
-                    // Tratamos de buscar la info de la pareja consultando el endpoint del otro ID
-                    val partnerId = if (room.creatorId == userId) room.guestId else room.creatorId
+                    val partnerId = if (room.creatorId == resolvedUserId) room.guestId else room.creatorId
                     try {
                         val partnerDto = userApi.getUserProfile(partnerId)
                         partnerUsernameFromRoom = partnerDto.username
                         partnerEmailFromRoom = partnerDto.email
-                        Log.d("UserRepositoryImpl", "Partner fetched - username: '${partnerDto.username}', email: '${partnerDto.email}'")
-                        if (partnerDto.username.isNullOrBlank()) {
-                            Log.w("UserRepositoryImpl", "Partner username is empty! Will use email as fallback")
-                        }
                     } catch (e: Exception) {
-                        Log.e("UserRepositoryImpl", "Error fetching partner profile: ${e.message}")
-                        e.printStackTrace()
+                        Log.w(TAG, "No se pudo obtener perfil de pareja: ${e.message}")
                     }
                 }
             }
         } catch (e: Exception) {
-            e.printStackTrace()
-             // It's possible the user doesn't have a room yet, or network failed just for rooms.
+            Log.w(TAG, "No se pudieron obtener las salas: ${e.message}")
         }
 
-        val profile = userProfileDto.toDomain(roomName, ownInviteCode)
+        var profile = userProfileDto.toDomain(roomName, ownInviteCode)
 
-        // Si el DTO original no trajo pareja, pero por salas descubrimos que sí la tiene, la mapeamos forzadamente
         if (profile.partner == null && hasPartnerFromRoom) {
-            // Usamos el username si existe, de lo contrario usamos el email, y como último recurso un valor por defecto
             val displayName = partnerUsernameFromRoom?.takeIf { it.isNotBlank() }
                 ?: partnerEmailFromRoom?.takeIf { it.isNotBlank() }
                 ?: "Pareja vinculada"
-            
-            Log.d("UserRepositoryImpl", "Creating partner with displayName: '$displayName' (username: '$partnerUsernameFromRoom', email: '$partnerEmailFromRoom')")
-            
-            return profile.copy(
-                partner = com.alejandra.amordepelis.features.user.domain.entities.PartnerProfile(
-                    id = if (userProfileDto.id == 0) "0" else "999", // Un id de respaldo si es necesario
+
+            profile = profile.copy(
+                partner = PartnerProfile(
+                    id = "remote",
                     username = displayName,
-                    email = partnerEmailFromRoom ?: "..."
+                    email = partnerEmailFromRoom ?: ""
                 )
             )
         }
-        
+
+        localUserDataSource.saveProfile(profile)
+        Log.d(TAG, "Perfil guardado en cache local: ${profile.username}")
+
         return profile
+    }
+
+    private suspend fun refreshProfileInBackground(userId: Int?) {
+        try {
+            val fresh = fetchAndCacheProfile(userId)
+            Log.d(TAG, "Perfil actualizado en background: ${fresh.username}")
+        } catch (e: Exception) {
+            Log.w(TAG, "Refresh en background falló — usando cache: ${e.message}")
+        }
     }
 
     private fun getUserIdFromToken(token: String): Int? {
@@ -94,7 +134,7 @@ class UserRepositoryImpl @Inject constructor(
                 json.getInt("userId")
             } else null
         } catch (e: Exception) {
-            e.printStackTrace()
+            Log.w(TAG, "No se pudo parsear userId del token: ${e.message}")
             null
         }
     }
@@ -102,15 +142,16 @@ class UserRepositoryImpl @Inject constructor(
     override suspend fun updateUserProfile(id: String, username: String) {
         val usernameBody = username.toRequestBody("text/plain".toMediaTypeOrNull())
         userApi.updateUserProfile(id, usernameBody, null)
+        localUserDataSource.clearProfile()
     }
 
     override suspend fun deleteUser(id: String) {
         userApi.deleteUser(id)
+        localUserDataSource.clearProfile()
     }
 
     override suspend fun joinVirtualRoom(invitationCode: String) {
-        userApi.joinVirtualRoom(
-            com.alejandra.amordepelis.features.user.data.datasources.remote.model.JoinRoomRequestDto(invitationCode)
-        )
+        userApi.joinVirtualRoom(JoinRoomRequestDto(invitationCode))
+        localUserDataSource.clearProfile()
     }
 }

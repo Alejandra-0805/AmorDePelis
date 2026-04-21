@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -22,7 +23,9 @@ class TokenDataStore @Inject constructor(
 
     companion object {
         private val TOKEN_KEY = stringPreferencesKey("auth_token")
-        private val ROLE_KEY = stringPreferencesKey("user_role")
+        private val ROLE_KEY  = stringPreferencesKey("user_role")
+        /** Persiste el ID de la sala (roomId) para uso offline. */
+        private val ROOM_ID_KEY = intPreferencesKey("active_room_id")
     }
 
     val tokenFlow: Flow<String?> = context.dataStore.data.map { preferences ->
@@ -32,6 +35,14 @@ class TokenDataStore @Inject constructor(
     val roleFlow: Flow<UserRole> = context.dataStore.data.map { preferences ->
         val roleString = preferences[ROLE_KEY] ?: UserRole.PAREJA.value
         UserRole.fromString(roleString)
+    }
+
+    /**
+     * Flow del roomId cacheado.
+     * Emite null si nunca se ha guardado un roomId (sesión nueva o logout).
+     */
+    val roomIdFlow: Flow<Int?> = context.dataStore.data.map { preferences ->
+        preferences[ROOM_ID_KEY]
     }
 
     suspend fun saveToken(token: String) {
@@ -51,6 +62,18 @@ class TokenDataStore @Inject constructor(
             preferences[TOKEN_KEY] = token
             preferences[ROLE_KEY] = role
         }
+    }
+
+    /** Persiste el roomId localmente para uso offline. */
+    suspend fun saveRoomId(roomId: Int) {
+        context.dataStore.edit { preferences ->
+            preferences[ROOM_ID_KEY] = roomId
+        }
+    }
+
+    /** Lee el roomId cacheado de forma puntual (suspend). Retorna null si no existe. */
+    suspend fun getRoomId(): Int? {
+        return context.dataStore.data.first()[ROOM_ID_KEY]
     }
 
     suspend fun getToken(): String? {

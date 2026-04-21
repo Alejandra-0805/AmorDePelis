@@ -6,5 +6,6 @@ data class HomeUseCases @Inject constructor(
     val getAllMovies: GetAllMoviesUseCase,
     val getAllNews: GetAllNewsUseCase,
     val getLatestNews: GetLatestNewsUseCase,
-    val createAnnouncement: CreateAnnouncementUseCase
+    val createAnnouncement: CreateAnnouncementUseCase,
+    val syncMovies: SyncMoviesUseCase
 )

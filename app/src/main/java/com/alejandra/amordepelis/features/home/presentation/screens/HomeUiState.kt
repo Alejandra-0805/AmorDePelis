@@ -14,7 +14,9 @@ data class HomeUiState(
     val addFirstMovieButtonLabel: String = "Agregar primera película",
     val isLoading: Boolean = false,
     val message: String? = null,
-    val error: String? = null
+    val error: String? = null,
+    val isConnected: Boolean = true,
+    val hasOfflineData: Boolean = false
 )
 
 data class RecentMovieUiModel(
@@ -22,3 +24,4 @@ data class RecentMovieUiModel(
     val title: String,
     val imageUrl: String? = null
 )
+

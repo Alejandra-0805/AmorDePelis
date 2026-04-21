@@ -1,9 +1,11 @@
 package com.alejandra.amordepelis.features.user.presentation.viewmodels
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.alejandra.amordepelis.features.user.domain.usecases.UserUseCases
+import com.alejandra.amordepelis.core.network.connectivity.ConnectivityManager
 import com.alejandra.amordepelis.core.storage.SessionManager
+import com.alejandra.amordepelis.features.user.domain.usecases.UserUseCases
 import com.alejandra.amordepelis.features.user.presentation.screens.UserAnnouncement
 import com.alejandra.amordepelis.features.user.presentation.screens.UserProfileUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -17,8 +19,13 @@ import javax.inject.Inject
 @HiltViewModel
 class UserViewModel @Inject constructor(
     private val useCases: UserUseCases,
-    private val sessionManager: SessionManager
+    private val sessionManager: SessionManager,
+    private val connectivityManager: ConnectivityManager
 ) : ViewModel() {
+
+    companion object {
+        private const val TAG = "UserViewModel"
+    }
 
     private val _profileUiState = MutableStateFlow(UserProfileUiState())
     val profileUiState: StateFlow<UserProfileUiState> = _profileUiState.asStateFlow()
@@ -31,6 +38,162 @@ class UserViewModel @Inject constructor(
 
     init {
         loadAnnouncements()
+        observeConnectivity()
+    }
+
+    private fun observeConnectivity() {
+        viewModelScope.launch {
+            connectivityManager.isConnected.collect { isConnected ->
+                _profileUiState.update { it.copy(isOffline = !isConnected) }
+                if (isConnected && _profileUiState.value.username.isNotEmpty()) {
+                    Log.d(TAG, "Red recuperada. Actualizando perfil en background.")
+                    loadUserProfile(silent = true)
+                }
+            }
+        }
+    }
+
+    fun loadUserProfile(silent: Boolean = false) {
+        viewModelScope.launch {
+            if (!silent) {
+                _profileUiState.update { it.copy(isLoading = true, error = null) }
+            } else {
+                _profileUiState.update { it.copy(isSyncing = true) }
+            }
+
+            runCatching { useCases.getUserProfile() }
+                .onSuccess { profile ->
+                    val isOffline = !connectivityManager.isNetworkAvailable()
+                    _profileUiState.update { state ->
+                        state.copy(
+                            isLoading  = false,
+                            isSyncing  = false,
+                            id         = profile.id,
+                            username   = profile.username,
+                            email      = profile.email,
+                            passwordMasked = profile.passwordMasked,
+                            hasPartner = profile.partner != null,
+                            partnerUsername = profile.partner?.username.orEmpty(),
+                            partnerEmail    = profile.partner?.email.orEmpty(),
+                            ownInviteCode   = profile.ownInviteCode.orEmpty(),
+                            roomName   = profile.roomName ?: "Sin sala asignada",
+                            role       = profile.role.orEmpty(),
+                            isOffline  = isOffline,
+                            error = if (isOffline) state.error else null
+                        )
+                    }
+                    Log.d(TAG, "Perfil cargado: ${profile.username} (offline=$isOffline)")
+                }
+                .onFailure { throwable ->
+                    _profileUiState.update {
+                        it.copy(
+                            isLoading = false,
+                            isSyncing = false,
+                            error = throwable.message ?: "Error al cargar el perfil"
+                        )
+                    }
+                    Log.e(TAG, "Error cargando perfil", throwable)
+                }
+        }
+    }
+
+    fun clearProfileMessage() {
+        _profileUiState.update { it.copy(message = null, error = null) }
+    }
+
+    fun toggleEditMode() {
+        _profileUiState.update { it.copy(isEditing = !it.isEditing) }
+    }
+
+    fun updateUsername(newUsername: String) {
+        _profileUiState.update { it.copy(username = newUsername) }
+    }
+
+    fun saveProfile() {
+        val currentState = _profileUiState.value
+        if (currentState.username.isBlank()) {
+            _profileUiState.update { it.copy(error = "El nombre de usuario no puede estar vacío") }
+            return
+        }
+
+        viewModelScope.launch {
+            _profileUiState.update { it.copy(isLoading = true, error = null) }
+            runCatching { useCases.updateUserProfile(currentState.id, currentState.username) }
+                .onSuccess {
+                    _profileUiState.update { it.copy(isEditing = false, message = "Perfil actualizado") }
+                    loadUserProfile()
+                }
+                .onFailure { throwable ->
+                    _profileUiState.update {
+                        it.copy(isLoading = false, error = throwable.message ?: "Error al actualizar perfil")
+                    }
+                }
+        }
+    }
+
+    fun showDeleteDialog(show: Boolean) {
+        _profileUiState.update { it.copy(showDeleteDialog = show) }
+    }
+
+    fun deleteProfile() {
+        val currentState = _profileUiState.value
+        viewModelScope.launch {
+            _profileUiState.update { it.copy(isDeleting = true, error = null) }
+            runCatching { useCases.deleteUser(currentState.id) }
+                .onSuccess {
+                    _profileUiState.update {
+                        it.copy(isDeleting = false, showDeleteDialog = false, message = "Perfil eliminado correctamente")
+                    }
+                }
+                .onFailure { throwable ->
+                    _profileUiState.update {
+                        it.copy(isDeleting = false, showDeleteDialog = false, error = throwable.message ?: "Error al eliminar perfil")
+                    }
+                }
+        }
+    }
+
+    fun onInviteCodeChange(newCode: String) {
+        _profileUiState.update { it.copy(inviteCodeInput = newCode) }
+    }
+
+    fun joinRoom() {
+        val code = _profileUiState.value.inviteCodeInput.trim()
+
+        if (code.isBlank() || code == _profileUiState.value.ownInviteCode) {
+            _profileUiState.update { it.copy(error = "El código ingresado es inválido o es tu propio código.") }
+            return
+        }
+
+        viewModelScope.launch {
+            _profileUiState.update { it.copy(isLoading = true, error = null) }
+            runCatching {
+                useCases.joinVirtualRoom(code)
+            }.onSuccess {
+                _profileUiState.update {
+                    it.copy(
+                        isLoading  = false,
+                        hasPartner = true,
+                        message    = "¡Pareja vinculada exitosamente!",
+                        inviteCodeInput = ""
+                    )
+                }
+                loadUserProfile()
+            }.onFailure { throwable ->
+                _profileUiState.update {
+                    it.copy(
+                        isLoading = false,
+                        error = throwable.message ?: "Parece que este código no existe o la sala ya está llena."
+                    )
+                }
+            }
+        }
+    }
+
+    fun logout() {
+        viewModelScope.launch {
+            sessionManager.logout()
+        }
     }
 
     private fun loadAnnouncements() {
@@ -58,127 +221,5 @@ class UserViewModel @Inject constructor(
 
     fun onAnnouncementIndexChange(index: Int) {
         _currentAnnouncementIndex.value = index
-    }
-
-    fun loadUserProfile() {
-        viewModelScope.launch {
-            _profileUiState.update { it.copy(isLoading = true, error = null) }
-            runCatching { useCases.getUserProfile() }
-                .onSuccess { profile ->
-                    _profileUiState.update {
-                        it.copy(
-                            isLoading = false,
-                            id = profile.id,
-                            username = profile.username,
-                            email = profile.email,
-                            passwordMasked = profile.passwordMasked,
-                            hasPartner = profile.partner != null,
-                            partnerUsername = profile.partner?.username.orEmpty(),
-                            partnerEmail = profile.partner?.email.orEmpty(),
-                            ownInviteCode = profile.ownInviteCode.orEmpty(),
-                            roomName = profile.roomName ?: "Sin sala asignada",
-                            role = profile.role.orEmpty()
-                        )
-                    }
-                }
-                .onFailure { throwable ->
-                    _profileUiState.update {
-                        it.copy(isLoading = false, error = throwable.message ?: "Error loading profile")
-                    }
-                }
-        }
-    }
-
-    fun clearProfileMessage() {
-        _profileUiState.update { it.copy(message = null, error = null) }
-    }
-
-    fun toggleEditMode() {
-        _profileUiState.update { it.copy(isEditing = !it.isEditing) }
-    }
-
-    fun updateUsername(newUsername: String) {
-        _profileUiState.update { it.copy(username = newUsername) }
-    }
-
-    fun saveProfile() {
-        val currentState = _profileUiState.value
-        if (currentState.username.isBlank()) {
-            _profileUiState.update { it.copy(error = "El nombre de usuario no puede estar vacío") }
-            return
-        }
-        
-        viewModelScope.launch {
-            _profileUiState.update { it.copy(isLoading = true, error = null) }
-            runCatching { useCases.updateUserProfile(currentState.id, currentState.username) }
-                .onSuccess {
-                    _profileUiState.update { it.copy(isEditing = false, message = "Perfil actualizado") }
-                    loadUserProfile()
-                }
-                .onFailure { throwable ->
-                    _profileUiState.update { it.copy(isLoading = false, error = throwable.message ?: "Error al actualizar perfil") }
-                }
-        }
-    }
-
-    fun showDeleteDialog(show: Boolean) {
-        _profileUiState.update { it.copy(showDeleteDialog = show) }
-    }
-
-    fun deleteProfile() {
-        val currentState = _profileUiState.value
-        viewModelScope.launch {
-            _profileUiState.update { it.copy(isDeleting = true, error = null) }
-            runCatching { useCases.deleteUser(currentState.id) }
-                .onSuccess {
-                    _profileUiState.update { it.copy(isDeleting = false, showDeleteDialog = false, message = "Perfil eliminado correctamente") }
-                }
-                .onFailure { throwable ->
-                    _profileUiState.update { it.copy(isDeleting = false, showDeleteDialog = false, error = throwable.message ?: "Error al eliminar perfil") }
-                }
-        }
-    }
-
-    fun onInviteCodeChange(newCode: String) {
-        _profileUiState.update { it.copy(inviteCodeInput = newCode) }
-    }
-
-    fun joinRoom() {
-        val code = _profileUiState.value.inviteCodeInput.trim()
-        
-        if (code.isBlank() || code == _profileUiState.value.ownInviteCode) {
-            _profileUiState.update { it.copy(error = "El código ingresado es inválido o es tu propio código.") }
-            return
-        }
-
-        viewModelScope.launch {
-            _profileUiState.update { it.copy(isLoading = true, error = null) }
-            runCatching {
-                useCases.joinVirtualRoom(code) 
-            }.onSuccess { 
-                _profileUiState.update { 
-                    it.copy(
-                        isLoading = false,
-                        hasPartner = true, 
-                        message = "¡Pareja vinculada exitosamente!",
-                        inviteCodeInput = ""
-                    ) 
-                }
-                loadUserProfile()
-            }.onFailure { throwable ->
-                _profileUiState.update { 
-                    it.copy(
-                        isLoading = false,
-                        error = throwable.message ?: "Parece que este código no existe o la sala ya está llena."
-                    )
-                }
-            }
-        }
-    }
-
-    fun logout() {
-        viewModelScope.launch {
-            sessionManager.logout()
-        }
     }
 }

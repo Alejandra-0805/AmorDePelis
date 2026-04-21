@@ -28,20 +28,37 @@ class SessionManager @Inject constructor(
     private val _isLoggedIn = MutableStateFlow(false)
     val isLoggedIn: StateFlow<Boolean> = _isLoggedIn.asStateFlow()
 
+    /**
+     * ID de la sala activa del usuario.
+     * Se inicializa desde el cache local (DataStore) al arrancar, por lo que
+     * está disponible incluso sin conexión a internet.
+     */
+    private val _currentRoomId = MutableStateFlow<Int?>(null)
+    val currentRoomId: StateFlow<Int?> = _currentRoomId.asStateFlow()
+
     @Volatile
     private var cachedRole: UserRole = UserRole.PAREJA
 
     init {
         scope.launch {
-            // Cargar rol inicial
+            // Cargar rol inicial desde cache
             cachedRole = tokenDataStore.getRole()
             _currentRole.value = cachedRole
             _isLoggedIn.value = tokenDataStore.getToken() != null
+            // Cargar roomId inicial desde cache (disponible offline)
+            _currentRoomId.value = tokenDataStore.getRoomId()
 
             // Observar cambios en el rol
             tokenDataStore.roleFlow.collect { role ->
                 cachedRole = role
                 _currentRole.value = role
+            }
+        }
+
+        scope.launch {
+            // Observar cambios en el roomId persistido
+            tokenDataStore.roomIdFlow.collect { roomId ->
+                _currentRoomId.value = roomId
             }
         }
 
@@ -59,7 +76,7 @@ class SessionManager @Inject constructor(
     fun getRole(): UserRole = cachedRole
 
     /**
-     * Guarda la sesión del usuario después del login
+     * Guarda la sesión del usuario después del login.
      */
     suspend fun saveSession(token: String, role: String) {
         tokenProvider.forceUpdateToken(token)
@@ -68,6 +85,18 @@ class SessionManager @Inject constructor(
         _currentRole.value = cachedRole
         _isLoggedIn.value = true
     }
+
+    /**
+     * Persiste el roomId localmente y actualiza el StateFlow.
+     * Llamar después de obtener el roomId de la API con éxito.
+     */
+    suspend fun saveRoomId(roomId: Int) {
+        tokenDataStore.saveRoomId(roomId)
+        _currentRoomId.value = roomId
+    }
+
+    /** Retorna el roomId cacheado de forma síncrona. */
+    fun getRoomId(): Int? = _currentRoomId.value
 
     /**
      * Cierra la sesión del usuario
