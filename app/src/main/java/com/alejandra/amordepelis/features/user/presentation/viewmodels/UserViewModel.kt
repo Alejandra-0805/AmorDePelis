@@ -76,7 +76,8 @@ class UserViewModel @Inject constructor(
                             partnerUsername = profile.partner?.username.orEmpty(),
                             partnerEmail = profile.partner?.email.orEmpty(),
                             ownInviteCode = profile.ownInviteCode.orEmpty(),
-                            roomName = profile.roomName ?: "Sin sala asignada"
+                            roomName = profile.roomName ?: "Sin sala asignada",
+                            role = profile.role.orEmpty()
                         )
                     }
                 }

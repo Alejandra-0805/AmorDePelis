@@ -16,6 +16,7 @@ data class UserProfileUiState(
     val inviteCodeInput: String = "",
     val partnerUsername: String = "",
     val partnerEmail: String = "",
+    val role: String = "",
     val error: String? = null,
     val message: String? = null
 )

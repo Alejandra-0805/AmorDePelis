@@ -7,5 +7,6 @@ data class UserProfile(
     val passwordMasked: String,
     val partner: PartnerProfile? = null,
     val roomName: String? = null,
-    val ownInviteCode: String? = null
+    val ownInviteCode: String? = null,
+    val role: String = ""
 )

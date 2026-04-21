@@ -103,18 +103,22 @@ fun UserProfileScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            PartnerSectionCard(
-                hasPartner = uiState.hasPartner, // Supone que hasPartner es verdadero cuando el usuario tiene un guest_id en su sala o pertenece a otra
-                ownInviteCode = uiState.ownInviteCode, // Lo trae del backend en el DTO 
-                roomName = uiState.roomName,
-                partnerUsername = uiState.partnerUsername,
-                inviteCodeInput = uiState.inviteCodeInput, 
-                onInviteCodeChange = viewModel::onInviteCodeChange,
-                onJoinRoomClick = viewModel::joinRoom,
-                modifier = Modifier.padding(horizontal = 20.dp)
-            )
+            if (uiState.role != "ADMIN") {
+                PartnerSectionCard(
+                    hasPartner = uiState.hasPartner, // Supone que hasPartner es verdadero cuando el usuario tiene un guest_id en su sala o pertenece a otra
+                    ownInviteCode = uiState.ownInviteCode, // Lo trae del backend en el DTO 
+                    roomName = uiState.roomName,
+                    partnerUsername = uiState.partnerUsername,
+                    inviteCodeInput = uiState.inviteCodeInput, 
+                    onInviteCodeChange = viewModel::onInviteCodeChange,
+                    onJoinRoomClick = viewModel::joinRoom,
+                    modifier = Modifier.padding(horizontal = 20.dp)
+                )
 
-            Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(24.dp))
+            } else {
+                Spacer(modifier = Modifier.height(8.dp))
+            }
 
             Button(
                 onClick = { viewModel.logout() },
