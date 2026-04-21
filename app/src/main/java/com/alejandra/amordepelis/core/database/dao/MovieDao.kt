@@ -1,23 +1,29 @@
 package com.alejandra.amordepelis.core.database.dao
 
 import androidx.room.Dao
-import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Upsert
 import com.alejandra.amordepelis.core.database.entities.MovieEntity
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface MovieDao {
+
     @Query("SELECT * FROM movies WHERE id = :id")
-    fun getMovieById(id: Int): MovieEntity?
+    suspend fun getMovieById(id: Int): MovieEntity?
 
     @Query("SELECT * FROM movies")
-    fun getAllMovies(): List<MovieEntity>
+    suspend fun getAllMovies(): List<MovieEntity>
+
+    @Query("SELECT * FROM movies")
+    fun observeAllMovies(): Flow<List<MovieEntity>>
 
     @Upsert
-    fun insertMovie(movie: MovieEntity)
+    suspend fun insertMovie(movie: MovieEntity)
 
     @Upsert
-    fun insertMovies(movies: List<MovieEntity>)
+    suspend fun insertMovies(movies: List<MovieEntity>)
 
+    @Query("DELETE FROM movies")
+    suspend fun clearAllMovies()
 }

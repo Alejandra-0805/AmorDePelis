@@ -27,7 +27,10 @@ data class ListsScreenUiState(
     // Permisos basados en rol
     val canCreateLists: Boolean = false,
     val canEditLists: Boolean = false,
-    val canDeleteLists: Boolean = false
+    val canDeleteLists: Boolean = false,
+    // Estado de conectividad
+    val isConnected: Boolean = true,
+    val hasOfflineData: Boolean = false
 )
 
 data class AddListUiState(

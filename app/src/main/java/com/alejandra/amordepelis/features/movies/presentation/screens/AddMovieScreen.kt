@@ -77,13 +77,15 @@ fun AddMovieScreen(
     val context = LocalContext.current
     var showPhotoDialog by remember { mutableStateOf(false) }
     var tempCameraUri by remember { mutableStateOf<android.net.Uri?>(null) }
+    // imageUri se mantiene como estado de UI local; se pasa al ViewModel al guardar.
+    var imageUriString by remember { mutableStateOf<String?>(null) }
 
     val scope = rememberCoroutineScope()
 
     val photoPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
         onResult = { uri ->
-            uri?.let { viewModel.updateAddMovieImageUri(it.toString()) }
+            uri?.let { imageUriString = it.toString() }
         }
     )
 
@@ -91,7 +93,7 @@ fun AddMovieScreen(
         contract = ActivityResultContracts.TakePicture(),
         onResult = { success ->
             if (success) {
-                tempCameraUri?.let { viewModel.updateAddMovieImageUri(it.toString()) }
+                tempCameraUri?.let { imageUriString = it.toString() }
             }
         }
     )
@@ -226,9 +228,9 @@ fun AddMovieScreen(
                             },
                         contentAlignment = Alignment.Center
                     ) {
-                        if (uiState.imageUri != null) {
+                        if (imageUriString != null) {
                             AsyncImage(
-                                model = uiState.imageUri,
+                                model = imageUriString,
                                 contentDescription = "Póster seleccionado",
                                 modifier = Modifier.fillMaxSize(),
                                 contentScale = ContentScale.Crop
@@ -256,7 +258,7 @@ fun AddMovieScreen(
                     Text(text = "Titulo:", style = MaterialTheme.typography.labelLarge)
                     Spacer(modifier = Modifier.height(8.dp))
                     OutlinedTextField(
-                        value = uiState.title,
+                        value = uiState.movieTitle,
                         onValueChange = viewModel::updateAddMovieTitle,
                         placeholder = { Text("Nombre de la pelicula") },
                         modifier = Modifier.fillMaxWidth(),
@@ -323,7 +325,7 @@ fun AddMovieScreen(
                     Spacer(modifier = Modifier.height(32.dp))
 
                     Button(
-                        onClick = viewModel::addMovie,
+                        onClick = { viewModel.addMovie(imageUriString) },
                         enabled = !uiState.isLoading,
                         modifier = Modifier
                             .fillMaxWidth()

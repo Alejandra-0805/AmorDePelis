@@ -19,7 +19,7 @@ import com.alejandra.amordepelis.core.database.entities.ListMovieEntity
                         ListEntity::class,
                         ListMovieEntity::class,
                         MovieEntity::class
-                     ], version = 1, exportSchema = false)
+                     ], version = 2, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun userDao(): UserDao
     abstract fun productDao(): ProductDao
