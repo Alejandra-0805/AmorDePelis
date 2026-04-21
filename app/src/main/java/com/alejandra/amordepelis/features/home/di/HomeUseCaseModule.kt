@@ -6,6 +6,7 @@ import com.alejandra.amordepelis.features.home.domain.usecases.GetAllMoviesUseCa
 import com.alejandra.amordepelis.features.home.domain.usecases.GetAllNewsUseCase
 import com.alejandra.amordepelis.features.home.domain.usecases.GetLatestNewsUseCase
 import com.alejandra.amordepelis.features.home.domain.usecases.HomeUseCases
+import com.alejandra.amordepelis.features.home.domain.usecases.SyncMoviesUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -42,17 +43,26 @@ object HomeUseCaseModule {
 
     @Provides
     @Singleton
+    fun provideSyncMoviesUseCase(repository: HomeRepository): SyncMoviesUseCase {
+        return SyncMoviesUseCase(repository)
+    }
+
+
+    @Provides
+    @Singleton
     fun provideHomeUseCases(
         getAllMoviesUseCase: GetAllMoviesUseCase,
         getAllNewsUseCase: GetAllNewsUseCase,
         getLatestNewsUseCase: GetLatestNewsUseCase,
-        createAnnouncementUseCase: CreateAnnouncementUseCase
+        createAnnouncementUseCase: CreateAnnouncementUseCase,
+        syncMoviesUseCase: SyncMoviesUseCase
     ): HomeUseCases {
         return HomeUseCases(
             getAllMovies = getAllMoviesUseCase,
             getAllNews = getAllNewsUseCase,
             getLatestNews = getLatestNewsUseCase,
-            createAnnouncement = createAnnouncementUseCase
+            createAnnouncement = createAnnouncementUseCase,
+            syncMovies = syncMoviesUseCase
         )
     }
 }

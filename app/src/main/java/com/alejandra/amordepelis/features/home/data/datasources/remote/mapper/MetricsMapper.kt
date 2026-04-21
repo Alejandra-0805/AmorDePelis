@@ -17,7 +17,13 @@ fun List<NewsDto>.toAnnouncementDomainList(): List<Announcement> = map { it.toDo
 fun MovieDto.toHomeMovie(): Movie = Movie(
     id = id.toString(),
     title = title,
-    imageUrl = imageUrl
+    synopsis = synopsis,
+    durationMinutes = durationMinutes,
+    imageUrl = imageUrl,
+    tags = tags.map { it.name },
+    averageRating = averageRating,
+    ratingCount = ratingCount,
+    isFavorite = isFavorite
 )
 
 fun List<MovieDto>.toHomeMovieList(): List<Movie> = map { it.toHomeMovie() }

@@ -1,5 +1,6 @@
 package com.alejandra.amordepelis.features.user.presentation.components
 
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -22,13 +23,14 @@ fun PartnerSectionCard(
     onJoinRoomClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    Log.d("PartnerSectionCard", "hasPartner: $hasPartner, roomName: $roomName, partnerUsername: $partnerUsername")
     Card(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
     ) {
         Column(
-            modifier = Modifier.padding(20.dp),
+            modifier = Modifier.padding(20.dp).fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             // ESTADO VINCULADO (COUPLED)

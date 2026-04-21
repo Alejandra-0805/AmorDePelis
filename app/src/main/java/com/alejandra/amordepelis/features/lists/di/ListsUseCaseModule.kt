@@ -5,7 +5,9 @@ import com.alejandra.amordepelis.features.lists.domain.usecases.CreateSharedList
 import com.alejandra.amordepelis.features.lists.domain.usecases.GetSharedListDetailsUseCase
 import com.alejandra.amordepelis.features.lists.domain.usecases.GetSharedListsUseCase
 import com.alejandra.amordepelis.features.lists.domain.usecases.AddMovieToListUseCase
+import com.alejandra.amordepelis.features.lists.domain.usecases.GetListDetailsUseCase
 import com.alejandra.amordepelis.features.lists.domain.usecases.ListsUseCases
+import com.alejandra.amordepelis.features.movies.domain.usecases.GetMovieDetailsUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -42,17 +44,25 @@ object ListsUseCaseModule {
 
     @Provides
     @Singleton
+    fun provideGetListDetailsUseCase(repository: ListsRepository): GetListDetailsUseCase {
+        return GetListDetailsUseCase(repository)
+    }
+
+    @Provides
+    @Singleton
     fun provideListsUseCases(
         getSharedListsUseCase: GetSharedListsUseCase,
         getSharedListDetailsUseCase: GetSharedListDetailsUseCase,
         createSharedListUseCase: CreateSharedListUseCase,
-        addMovieToListUseCase: AddMovieToListUseCase
+        addMovieToListUseCase: AddMovieToListUseCase,
+        getListDetailsUseCase: GetListDetailsUseCase
     ): ListsUseCases {
         return ListsUseCases(
             getSharedLists = getSharedListsUseCase,
             getSharedListDetails = getSharedListDetailsUseCase,
             createSharedList = createSharedListUseCase,
-            addMovieToList = addMovieToListUseCase
+            addMovieToList = addMovieToListUseCase,
+            getListDetailsUseCase = getListDetailsUseCase
         )
     }
 }

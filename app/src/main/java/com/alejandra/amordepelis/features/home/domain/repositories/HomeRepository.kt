@@ -9,4 +9,5 @@ interface HomeRepository {
     suspend fun getLatestNews(): Announcement
     suspend fun getAllNews(): List<Announcement>
     suspend fun createAnnouncement(title: String, content: String, imageFile: File?): Announcement
+    suspend fun syncMovies()
 }

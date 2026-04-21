@@ -1,0 +1,247 @@
+Picked up JAVA_TOOL_OPTIONS: -Dstdout.encoding=UTF-8 -Dstderr.encoding=UTF-8
+
+> Configure project :app
+WARNING: The option setting 'android.disallowKotlinSourceSets=false' is experimental.
+The current default is 'true'.
+Kotlin does not yet support 25 JDK target, falling back to Kotlin JVM_24 JVM target
+
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:generateDebugResources UP-TO-DATE
+> Task :app:packageDebugResources UP-TO-DATE
+> Task :app:processDebugNavigationResources UP-TO-DATE
+> Task :app:parseDebugLocalResources UP-TO-DATE
+> Task :app:generateDebugRFile UP-TO-DATE
+
+> Task :app:kspDebugKotlin
+Kotlin does not yet support 25 JDK target, falling back to Kotlin JVM_24 JVM target
+Kotlin does not yet support 25 JDK target, falling back to Kotlin JVM_24 JVM target
+
+> Task :app:compileDebugKotlin
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/navigation/MoviesNavGraph.kt:50:17 Overload resolution ambiguity between candidates:
+fun AddMovieScreen(viewModel: AddMovieViewModel = ..., onMovieSaved: () -> Unit = ...): Unit
+fun AddMovieScreen(viewModel: AddMovieViewModel = ..., onMovieSaved: () -> Unit = ...): Unit
+fun AddMovieScreen(viewModel: AddMovieViewModel = ..., onMovieSaved: () -> Unit = ...): Unit
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:3:16 Conflicting import: imported name 'Manifest' is ambiguous.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:5:33 Conflicting import: imported name 'PickVisualMediaRequest' is ambiguous.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:6:42 Conflicting import: imported name 'ActivityResultContracts' is ambiguous.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:15:42 Conflicting import: imported name 'RoundedCornerShape' is ambiguous.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:18:35 Conflicting import: imported name 'ButtonDefaults' is ambiguous.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:20:35 Conflicting import: imported name 'CardDefaults' is ambiguous.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:22:35 Conflicting import: imported name 'MaterialTheme' is ambiguous.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:24:35 Conflicting import: imported name 'SnackbarDuration' is ambiguous.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:26:35 Conflicting import: imported name 'SnackbarHostState' is ambiguous.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:28:33 Conflicting import: imported name 'Composable' is ambiguous.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:34:28 Conflicting import: imported name 'Alignment' is ambiguous.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:35:28 Conflicting import: imported name 'Modifier' is ambiguous.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:36:38 Conflicting import: imported name 'FontWeight' is ambiguous.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:37:39 Conflicting import: imported name 'KeyboardType' is ambiguous.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:45:74 Conflicting import: imported name 'AddMovieViewModel' is ambiguous.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:54:1 Conflicting overloads:
+fun AddMovieScreen(viewModel: AddMovieViewModel = ..., onMovieSaved: () -> Unit = ...): Unit
+fun AddMovieScreen(viewModel: AddMovieViewModel = ..., onMovieSaved: () -> Unit = ...): Unit
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:138:17 No parameter with name 'errorMessage' found.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:152:17 No parameter with name 'errorMessage' found.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:165:17 No parameter with name 'errorMessage' found.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:178:17 No parameter with name 'errorMessage' found.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:201:29 No value passed for parameter 'onTap'.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:251:13 No parameter with name 'onTakePhoto' found.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:255:13 No parameter with name 'onPickPhoto' found.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:255:13 No value passed for parameter 'isVisible'.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:255:13 No value passed for parameter 'onCameraClick'.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:255:13 No value passed for parameter 'onGalleryClick'.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:262:1 Syntax error: Expecting a top level declaration.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:262:9 Syntax error: Expecting a top level declaration.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:262:12 Syntax error: Expecting a top level declaration.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:262:13 Syntax error: Expecting a top level declaration.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:262:22 Syntax error: Expecting a top level declaration.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:262:23 Syntax error: Expecting a top level declaration.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:262:34 Syntax error: Expecting a top level declaration.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:262:35 Syntax error: Expecting a top level declaration.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:262:43 Syntax error: Expecting a top level declaration.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:262:44 Syntax error: Expecting a top level declaration.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:262:50 Syntax error: Expecting a top level declaration.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:262:51 Syntax error: Expecting a top level declaration.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:262:63 Syntax error: Expecting a top level declaration.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:262:64 Syntax error: Expecting a top level declaration.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:262:71 Syntax error: imports are only allowed in the beginning of file.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:264:16 Conflicting import: imported name 'Manifest' is ambiguous.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:266:33 Conflicting import: imported name 'PickVisualMediaRequest' is ambiguous.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:267:42 Conflicting import: imported name 'ActivityResultContracts' is ambiguous.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:276:42 Conflicting import: imported name 'RoundedCornerShape' is ambiguous.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:279:35 Conflicting import: imported name 'ButtonDefaults' is ambiguous.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:281:35 Conflicting import: imported name 'CardDefaults' is ambiguous.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:283:35 Conflicting import: imported name 'MaterialTheme' is ambiguous.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:285:35 Conflicting import: imported name 'SnackbarDuration' is ambiguous.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:287:35 Conflicting import: imported name 'SnackbarHostState' is ambiguous.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:289:33 Conflicting import: imported name 'Composable' is ambiguous.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:295:28 Conflicting import: imported name 'Alignment' is ambiguous.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:296:28 Conflicting import: imported name 'Modifier' is ambiguous.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:297:38 Conflicting import: imported name 'FontWeight' is ambiguous.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:298:39 Conflicting import: imported name 'KeyboardType' is ambiguous.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:306:74 Conflicting import: imported name 'AddMovieViewModel' is ambiguous.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:315:1 Conflicting overloads:
+fun AddMovieScreen(viewModel: AddMovieViewModel = ..., onMovieSaved: () -> Unit = ...): Unit
+fun AddMovieScreen(viewModel: AddMovieViewModel = ..., onMovieSaved: () -> Unit = ...): Unit
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:399:17 No parameter with name 'errorMessage' found.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:413:17 No parameter with name 'errorMessage' found.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:426:17 No parameter with name 'errorMessage' found.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:439:17 No parameter with name 'errorMessage' found.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:462:29 No value passed for parameter 'onTap'.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:512:13 No parameter with name 'onTakePhoto' found.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:516:13 No parameter with name 'onPickPhoto' found.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:516:13 No value passed for parameter 'isVisible'.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:516:13 No value passed for parameter 'onCameraClick'.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:516:13 No value passed for parameter 'onGalleryClick'.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:523:1 Syntax error: Expecting a top level declaration.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:523:9 Syntax error: Expecting a top level declaration.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:523:12 Syntax error: Expecting a top level declaration.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:523:13 Syntax error: Expecting a top level declaration.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:523:22 Syntax error: Expecting a top level declaration.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:523:23 Syntax error: Expecting a top level declaration.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:523:34 Syntax error: Expecting a top level declaration.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:523:35 Syntax error: Expecting a top level declaration.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:523:43 Syntax error: Expecting a top level declaration.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:523:44 Syntax error: Expecting a top level declaration.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:523:50 Syntax error: Expecting a top level declaration.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:523:51 Syntax error: Expecting a top level declaration.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:523:63 Syntax error: Expecting a top level declaration.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:523:64 Syntax error: Expecting a top level declaration.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:523:71 Syntax error: imports are only allowed in the beginning of file.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:525:16 Conflicting import: imported name 'Manifest' is ambiguous.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:527:33 Conflicting import: imported name 'PickVisualMediaRequest' is ambiguous.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:528:42 Conflicting import: imported name 'ActivityResultContracts' is ambiguous.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:537:42 Conflicting import: imported name 'RoundedCornerShape' is ambiguous.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:540:35 Conflicting import: imported name 'ButtonDefaults' is ambiguous.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:542:35 Conflicting import: imported name 'CardDefaults' is ambiguous.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:544:35 Conflicting import: imported name 'MaterialTheme' is ambiguous.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:546:35 Conflicting import: imported name 'SnackbarDuration' is ambiguous.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:548:35 Conflicting import: imported name 'SnackbarHostState' is ambiguous.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:550:33 Conflicting import: imported name 'Composable' is ambiguous.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:556:28 Conflicting import: imported name 'Modifier' is ambiguous.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:557:38 Conflicting import: imported name 'FontWeight' is ambiguous.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:558:39 Conflicting import: imported name 'KeyboardType' is ambiguous.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:566:74 Conflicting import: imported name 'AddMovieViewModel' is ambiguous.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:575:1 Conflicting overloads:
+fun AddMovieScreen(viewModel: AddMovieViewModel = ..., onMovieSaved: () -> Unit = ...): Unit
+fun AddMovieScreen(viewModel: AddMovieViewModel = ..., onMovieSaved: () -> Unit = ...): Unit
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:796:5 Syntax error: Expecting a top level declaration.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:796:19 Syntax error: Expecting a top level declaration.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:796:20 Syntax error: Expecting a top level declaration.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:796:27 Syntax error: Expecting a top level declaration.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:796:28 Syntax error: Expecting a top level declaration.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:796:35 Syntax error: Expecting a top level declaration.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:796:37 Syntax error: Expecting a top level declaration.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:796:37 Function declaration must have a name.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:797:13 Unresolved reference 'uiState'.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:798:13 Unresolved reference 'onMovieSaved'.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:799:13 Unresolved reference 'viewModel'.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:803:5 Syntax error: Expecting a top level declaration.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:803:19 Syntax error: Expecting a top level declaration.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:803:20 Syntax error: Expecting a top level declaration.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:803:27 Syntax error: Expecting a top level declaration.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:803:28 Syntax error: Expecting a top level declaration.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:803:33 Syntax error: Expecting a top level declaration.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:803:35 Syntax error: Expecting a top level declaration.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:803:35 Function declaration must have a name.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:804:9 Unresolved reference 'uiState'.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:804:24 Cannot infer type for this parameter. Specify it explicitly.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:804:28 Cannot infer type for this parameter. Specify it explicitly.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:805:13 Unresolved reference 'snackbarHostState'.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:806:13 Unresolved reference 'viewModel'.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:812:5 Syntax error: Expecting a top level declaration.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:812:13 Syntax error: Expecting a top level declaration.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:813:9 Syntax error: Expecting a top level declaration.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:813:18 Syntax error: Expecting a top level declaration.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:813:20 Syntax error: Expecting a top level declaration.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:813:28 Syntax error: Expecting a top level declaration.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:813:29 Syntax error: Expecting a top level declaration.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:813:40 Syntax error: Expecting a top level declaration.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:813:41 Syntax error: Expecting a top level declaration.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:813:42 Syntax error: Expecting a top level declaration.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:814:9 Syntax error: Expecting a top level declaration.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:814:22 Syntax error: Expecting a top level declaration.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:814:24 Syntax error: Expecting a top level declaration.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:814:24 Functions which invoke @Composable functions must be marked with the @Composable annotation
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:814:24 Function declaration must have a name.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:814:26 @Composable invocations can only happen from the context of a @Composable function
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:814:39 Unresolved reference 'snackbarHostState'.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:814:59 Syntax error: Expecting a top level declaration.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:815:9 Syntax error: Expecting a top level declaration.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:815:29 Syntax error: Expecting a top level declaration.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:815:31 Syntax error: Expecting a top level declaration.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:815:39 Syntax error: Expecting a top level declaration.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:815:40 Syntax error: Expecting a top level declaration.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:815:47 Syntax error: Expecting a top level declaration.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:815:48 Syntax error: Expecting a top level declaration.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:815:58 Syntax error: Expecting a top level declaration.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:815:59 Syntax error: Expecting a top level declaration.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:815:65 Syntax error: Expecting a top level declaration.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:815:66 Syntax error: Expecting a top level declaration.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:815:78 Syntax error: Expecting a top level declaration.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:815:79 Syntax error: Expecting a top level declaration.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:815:80 Syntax error: Expecting a top level declaration.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:815:82 Syntax error: Expecting a top level declaration.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:815:83 Syntax error: Expecting a top level declaration.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:815:85 Syntax error: Expecting a top level declaration.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:815:86 Syntax error: Expecting a top level declaration.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:815:88 Syntax error: Expecting a top level declaration.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:815:89 Syntax error: Expecting a top level declaration.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:816:5 Syntax error: Expecting a top level declaration.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:816:7 Syntax error: Expecting a top level declaration.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:816:7 Functions which invoke @Composable functions must be marked with the @Composable annotation
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:816:7 Function declaration must have a name.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:816:9 Unresolved reference '_'.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:816:11 Syntax error: Unexpected tokens (use ';' to separate expressions on the same line).
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:817:9 @Composable invocations can only happen from the context of a @Composable function
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:820:33 @Composable invocations can only happen from the context of a @Composable function
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:856:36 Unresolved reference 'uiState'.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:857:35 Unresolved reference 'showPhotoDialog'.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:862:25 Unresolved reference 'showPhotoDialog'.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:866:43 Unresolved reference 'showPhotoDialog'.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:868:33 Unresolved reference 'showPhotoDialog'.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:869:37 Unresolved reference 'activity'.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:870:37 Unresolved reference 'viewModel'.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:870:59 Unresolved reference 'activity'.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:874:33 Unresolved reference 'showPhotoDialog'.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:875:37 Unresolved reference 'activity'.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:876:37 Unresolved reference 'viewModel'.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:876:63 Unresolved reference 'activity'.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:886:33 Unresolved reference 'uiState'.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:887:41 Unresolved reference 'viewModel'.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:890:33 Unresolved reference 'uiState'.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:893:36 Unresolved reference 'uiState'.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:900:33 Unresolved reference 'uiState'.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:901:41 Unresolved reference 'viewModel'.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:906:36 Unresolved reference 'uiState'.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:913:33 Unresolved reference 'uiState'.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:914:41 Unresolved reference 'viewModel'.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:917:33 Unresolved reference 'uiState'.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:919:36 Unresolved reference 'uiState'.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:926:33 Unresolved reference 'uiState'.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:927:41 Unresolved reference 'viewModel'.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:930:33 Unresolved reference 'uiState'.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:931:36 Unresolved reference 'uiState'.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:938:37 Unresolved reference 'viewModel'.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:939:36 Unresolved reference 'uiState'.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:949:29 Unresolved reference 'uiState'.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/screens/AddMovieScreen.kt:964:1 Syntax error: Expecting a top level declaration.
+e: file:///C:/Users/aleja/AndroidStudioProjects/ale-nini/AmorDePelis/app/src/main/java/com/alejandra/amordepelis/features/movies/presentation/viewmodels/MoviesViewModel.kt:284:28 Argument type mismatch: actual type is 'Set<String>', but 'String?' was expected.
+
+> Task :app:compileDebugKotlin FAILED
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:compileDebugKotlin'.
+> A failure occurred while executing org.jetbrains.kotlin.compilerRunner.GradleCompilerRunnerWithWorkers$GradleKotlinCompilerWorkAction
+   > Compilation error. See log for more details
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to generate a Build Scan (Powered by Develocity).
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 59s
+7 actionable tasks: 2 executed, 5 up-to-date

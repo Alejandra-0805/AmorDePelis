@@ -16,8 +16,12 @@ data class UserProfileUiState(
     val inviteCodeInput: String = "",
     val partnerUsername: String = "",
     val partnerEmail: String = "",
+    val role: String = "",
     val error: String? = null,
-    val message: String? = null
+    val message: String? = null,
+    // Offline-first flags
+    val isOffline: Boolean = false,
+    val isSyncing: Boolean = false
 )
 
 data class PartnerSearchResultUiModel(

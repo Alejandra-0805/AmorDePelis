@@ -8,6 +8,6 @@ class GetSharedListDetailsUseCase @Inject constructor(
     private val repository: ListsRepository
 ) {
     suspend operator fun invoke(roomId: Int, listId: Int, listName: String): SharedListDetails {
-        return repository.getSharedListDetails(roomId, listId, listName)
+        return repository.getSharedListDetails(roomId, listId)
     }
 }

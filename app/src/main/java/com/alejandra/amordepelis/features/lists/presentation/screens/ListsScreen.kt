@@ -108,12 +108,12 @@ fun ListsScreen(
                     )
                 }
             }
-        }
-    ) { innerPadding ->
+        },
+        contentWindowInsets = androidx.compose.foundation.layout.WindowInsets(0, 0, 0, 0)
+    ) { _ ->
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding)
         ) {
             item {
                 ListsHeader(

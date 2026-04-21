@@ -1,7 +1,9 @@
 package com.alejandra.amordepelis.features.lists.presentation.viewmodels
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.alejandra.amordepelis.core.network.connectivity.ConnectivityManager
 import com.alejandra.amordepelis.core.storage.SessionManager
 import com.alejandra.amordepelis.features.lists.domain.entities.CreateListParams
 import com.alejandra.amordepelis.features.lists.domain.usecases.ListsUseCases
@@ -16,6 +18,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -27,9 +30,14 @@ import javax.inject.Inject
 class ListsViewModel @Inject constructor(
     private val useCases: ListsUseCases,
     private val sessionManager: SessionManager,
+    private val connectivityManager: ConnectivityManager,
     private val userApi: UserApi,
     private val hapticFeedbackManager: HapticFeedbackManager
 ) : ViewModel() {
+
+    companion object {
+        private const val TAG = "ListsViewModel"
+    }
 
     private val _listsUiState = MutableStateFlow(ListsScreenUiState())
     val listsUiState: StateFlow<ListsScreenUiState> = _listsUiState.asStateFlow()
@@ -55,21 +63,29 @@ class ListsViewModel @Inject constructor(
     private val _currentAnnouncementIndex = MutableStateFlow(0)
     val currentAnnouncementIndex: StateFlow<Int> = _currentAnnouncementIndex.asStateFlow()
 
-    // Estado del selector de lista para agregar una película
     private val _movieIdPendingAdd = MutableStateFlow<String?>(null)
     val movieIdPendingAdd: StateFlow<String?> = _movieIdPendingAdd.asStateFlow()
 
     private val _isAddingMovieToList = MutableStateFlow(false)
     val isAddingMovieToList: StateFlow<Boolean> = _isAddingMovieToList.asStateFlow()
 
-    // IDs de las listas que YA contienen la película pendiente de agregar
     private val _listIdsContainingPendingMovie = MutableStateFlow<Set<String>>(emptySet())
     val listIdsContainingPendingMovie: StateFlow<Set<String>> = _listIdsContainingPendingMovie.asStateFlow()
 
-    // Almacena el roomId activo del usuario
-    private var activeRoomId: Int? = null
+    private val _activeRoomId = MutableStateFlow<Int?>(null)
+    val activeRoomId: StateFlow<Int?> = _activeRoomId.asStateFlow()
 
     init {
+        // Observar estado de conectividad
+        viewModelScope.launch {
+            connectivityManager.isConnected.collect { isConnected ->
+                _listsUiState.update { it.copy(isConnected = isConnected) }
+                if (isConnected && _listsUiState.value.hasOfflineData) {
+                    loadSharedLists()
+                }
+            }
+        }
+        
         updatePermissions()
         loadActiveRoom()
     }
@@ -90,23 +106,47 @@ class ListsViewModel @Inject constructor(
 
     private fun loadActiveRoom() {
         viewModelScope.launch {
-            try {
-                val rooms = userApi.getUserRooms()
-                if (rooms.isNotEmpty()) {
-                    activeRoomId = rooms.first().id
-                    loadSharedLists()
+            val cachedRoomId = sessionManager.getRoomId()
+            if (cachedRoomId != null) {
+                Log.d(TAG, "RoomId obtenido del cache local: $cachedRoomId")
+                _activeRoomId.value = cachedRoomId
+                loadSharedLists()
+            }
+
+            if (connectivityManager.isNetworkAvailable()) {
+                try {
+                    val rooms = userApi.getUserRooms()
+                    if (rooms.isNotEmpty()) {
+                        val room = rooms.first()
+                        val freshRoomId = room.id
+
+                        sessionManager.saveRoomId(freshRoomId)
+
+                        if (freshRoomId != _activeRoomId.value) {
+                            Log.d(TAG, "RoomId actualizado desde API: $freshRoomId")
+                            _activeRoomId.value = freshRoomId
+                            loadSharedLists()
+                        }
+                    }
+                } catch (e: Exception) {
+                    Log.w(TAG, "No se pudo actualizar el roomId desde la API (usando cache)", e)
                 }
-            } catch (e: Exception) {
-                _error.value = "No se pudo cargar la sala activa"
+            } else if (cachedRoomId == null) {
+                Log.w(TAG, "Sin red y sin roomId en cache. No se pueden cargar las listas.")
+                _listsUiState.update {
+                    it.copy(
+                        isLoading = false,
+                        error = "Sin conexión. Conectáte al menos una vez para cargar tus listas."
+                    )
+                }
             }
         }
     }
 
-    // Funciones de permisos para la UI
     fun canCreateLists(): Boolean = sessionManager.canCreateLists()
 
     fun loadSharedLists() {
-        val roomId = activeRoomId ?: return
+        val roomId = _activeRoomId.value ?: return
         viewModelScope.launch {
             _isLoading.value = true
             _error.value = null
@@ -114,6 +154,9 @@ class ListsViewModel @Inject constructor(
             
             runCatching { useCases.getSharedLists(roomId) }
                 .onSuccess { lists ->
+                    val hasData = lists.isNotEmpty()
+                    val isOffline = !connectivityManager.isNetworkAvailable()
+                    
                     _listsUiState.update {
                         it.copy(
                             isLoading = false,
@@ -125,12 +168,11 @@ class ListsViewModel @Inject constructor(
                                     movieCount = list.movieCount,
                                     colorHex = list.colorHex
                                 )
-                            }
+                            },
+                            hasOfflineData = hasData && isOffline
                         )
                     }
                     _isLoading.value = false
-                    // El backend no devuelve movieCount; lo calculamos en cliente
-                    // pidiendo las películas de cada lista en paralelo.
                     enrichListsWithMovieCounts(roomId, lists.map { it.id })
                 }
                 .onFailure { throwable ->
@@ -144,11 +186,51 @@ class ListsViewModel @Inject constructor(
     }
 
     fun loadListDetails(listId: String, listName: String = "") {
-        val roomId = activeRoomId ?: return
+        Log.d("ListsViewModel", "activeRoomId=${_activeRoomId.value}")
+        
         viewModelScope.launch {
-            _detailsUiState.update { it.copy(isLoading = true, error = null) }
-            runCatching { useCases.getSharedListDetails(roomId, listId.toInt(), listName) }
-                .onSuccess { details ->
+            try {
+                Log.d("ListsViewModel", "Setting isLoading to true and clearing error")
+                _detailsUiState.update { it.copy(isLoading = true, error = null) }
+                
+                // Validar que listId no sea vacío
+                if (listId.isBlank()) {
+                    Log.e("ListsViewModel", "ERROR: listId is blank!")
+                    _detailsUiState.update {
+                        it.copy(
+                            isLoading = false,
+                            error = "ID de lista inválido"
+                        )
+                    }
+                    return@launch
+                }
+                
+                // Espera a que activeRoomId esté disponible (hasta 5 segundos)
+                var roomId = _activeRoomId.value
+                var waitAttempts = 0
+                while (roomId == null && waitAttempts < 50) {
+                    Log.d("ListsViewModel", "Waiting for activeRoomId... attempt ${waitAttempts + 1}/50")
+                    delay(100)
+                    roomId = _activeRoomId.value
+                    waitAttempts++
+                }
+                
+                if (roomId == null) {
+                    Log.e("ListsViewModel", "ERROR: activeRoomId is still null after waiting!")
+                    _detailsUiState.update {
+                        it.copy(
+                            isLoading = false,
+                            error = "No se encontró una sala activa. Por favor, recarga la aplicación."
+                        )
+                    }
+                    return@launch
+                }
+                
+                Log.d("ListsViewModel", "Starting API call: roomId=$roomId, listId=$listId")
+                runCatching { 
+                    useCases.getSharedListDetails(roomId, listId.toInt(), listName)
+                }.onSuccess { details ->
+                    Log.d("ListsViewModel", "SUCCESS: List details loaded: name=${details.name}, movies count=${details.movies.size}")
                     _detailsUiState.update {
                         it.copy(
                             isLoading = false,
@@ -159,12 +241,25 @@ class ListsViewModel @Inject constructor(
                             movies = details.movies
                         )
                     }
-                }
-                .onFailure { throwable ->
+                    Log.d("ListsViewModel", "UI State updated successfully")
+                }.onFailure { throwable ->
+                    Log.e("ListsViewModel", "ERROR loading list details: ${throwable.message}", throwable)
                     _detailsUiState.update {
-                        it.copy(isLoading = false, error = throwable.message ?: "Error loading list details")
+                        it.copy(
+                            isLoading = false, 
+                            error = throwable.message ?: "Error loading list details"
+                        )
                     }
                 }
+            } catch (e: Exception) {
+                Log.e("ListsViewModel", "Exception in loadListDetails: ${e.message}", e)
+                _detailsUiState.update {
+                    it.copy(
+                        isLoading = false, 
+                        error = "Error inesperado: ${e.message}"
+                    )
+                }
+            }
         }
     }
 
@@ -176,6 +271,10 @@ class ListsViewModel @Inject constructor(
         _addListUiState.update { it.copy(description = value, error = null) }
     }
 
+    fun onColorChange(value: String) {
+        _addListUiState.update { it.copy(colorHex = value, error = null) }
+    }
+
     fun createList() {
         // Verificar permiso antes de crear
         if (!sessionManager.canCreateLists()) {
@@ -183,7 +282,7 @@ class ListsViewModel @Inject constructor(
             return
         }
 
-        val roomId = activeRoomId
+        val roomId = _activeRoomId.value
         if (roomId == null) {
             _error.value = "No se encontró una sala activa. Únete o crea una sala primero."
             return
@@ -201,7 +300,9 @@ class ListsViewModel @Inject constructor(
                 useCases.createSharedList(
                     CreateListParams(
                         roomId = roomId,
-                        name = state.name
+                        name = state.name,
+                        description = state.description,
+                        colorHex = state.colorHex
                     )
                 )
             }.onSuccess {
@@ -210,7 +311,8 @@ class ListsViewModel @Inject constructor(
                         isLoading = false,
                         isSaved = true,
                         name = "",
-                        description = ""
+                        description = "",
+                        colorHex = "#3B82F6"
                     )
                 }
                 _message.value = "Lista creada exitosamente"
@@ -224,7 +326,7 @@ class ListsViewModel @Inject constructor(
     }
 
     fun requestAddMovieToList(movieId: String) {
-        val roomId = activeRoomId
+        val roomId = _activeRoomId.value
         if (roomId == null) {
             _error.value = "No se encontró una sala activa. Únete o crea una sala primero."
             return
@@ -308,7 +410,7 @@ class ListsViewModel @Inject constructor(
     }
 
     fun confirmAddMovieToList(listId: String) {
-        val roomId = activeRoomId ?: return
+        val roomId = _activeRoomId.value ?: return
         val movieId = _movieIdPendingAdd.value ?: return
 
         viewModelScope.launch {

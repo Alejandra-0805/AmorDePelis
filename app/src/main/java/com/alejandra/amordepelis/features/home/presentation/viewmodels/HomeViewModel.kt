@@ -2,6 +2,7 @@ package com.alejandra.amordepelis.features.home.presentation.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.alejandra.amordepelis.core.network.connectivity.ConnectivityManager
 import com.alejandra.amordepelis.core.storage.SessionManager
 import com.alejandra.amordepelis.core.storage.UserRole
 import com.alejandra.amordepelis.features.home.domain.usecases.HomeUseCases
@@ -19,7 +20,8 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val homeUseCases: HomeUseCases,
-    private val sessionManager: SessionManager
+    private val sessionManager: SessionManager,
+    private val connectivityManager: ConnectivityManager
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(HomeUiState())
@@ -42,10 +44,21 @@ class HomeViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
+            connectivityManager.isConnected.collect { isConnected ->
+                _uiState.update { it.copy(isConnected = isConnected) }
+                if (isConnected && _uiState.value.hasOfflineData) {
+                    _message.value = "Conexión restaurada - sincronizando datos..."
+                    loadHome()
+                }
+            }
+        }
+
+        viewModelScope.launch {
             sessionManager.currentRole.collect { role ->
                 _uiState.update { it.copy(showAddFirstMovieButton = role != UserRole.PAREJA) }
             }
         }
+
         loadHome()
     }
 
@@ -59,6 +72,9 @@ class HomeViewModel @Inject constructor(
                 val allNews = homeUseCases.getAllNews()
                 val latestNews = try { homeUseCases.getLatestNews() } catch (_: Exception) { null }
 
+                val hasData = movies.isNotEmpty()
+                val isOffline = !connectivityManager.isNetworkAvailable()
+                
                 _uiState.update {
                     it.copy(
                         moviesWatched = movies.size,
@@ -77,7 +93,8 @@ class HomeViewModel @Inject constructor(
                                 imageUrl = news.imageUrl
                             )
                         },
-                        isLoading = false
+                        isLoading = false,
+                        hasOfflineData = hasData && isOffline
                     )
                 }
 
@@ -118,3 +135,4 @@ class HomeViewModel @Inject constructor(
         _uiState.update { it.copy(error = null) }
     }
 }
+

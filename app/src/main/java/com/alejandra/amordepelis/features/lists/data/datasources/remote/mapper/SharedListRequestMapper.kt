@@ -5,6 +5,8 @@ import com.alejandra.amordepelis.features.lists.domain.entities.CreateListParams
 
 fun CreateListParams.toDto(): CreateListRequestDto {
     return CreateListRequestDto(
-        name = name
+        name = name,
+        description = description,
+        colorHex = colorHex
     )
 }
