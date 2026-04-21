@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.alejandra.amordepelis.core.hardware.domain.CameraManager
 import com.alejandra.amordepelis.core.hardware.domain.HapticFeedbackManager
 import com.alejandra.amordepelis.features.home.domain.usecases.HomeUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -30,7 +31,8 @@ data class AddAnnouncementUiState(
 class AddAnnouncementViewModel @Inject constructor(
     private val homeUseCases: HomeUseCases,
     @ApplicationContext private val context: Context,
-    private val hapticFeedbackManager: HapticFeedbackManager
+    private val hapticFeedbackManager: HapticFeedbackManager,
+    private val cameraManager: CameraManager
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(AddAnnouncementUiState())
@@ -55,6 +57,14 @@ class AddAnnouncementViewModel @Inject constructor(
     fun resetState() {
         _uiState.value = AddAnnouncementUiState()
     }
+
+    // ── Cámara ───────────────────────────────────────────────────────────────
+
+    /** Crea un URI temporal para la cámara. Devuelve null si FileProvider falla. */
+    fun createCameraUri(): Uri? = cameraManager.createTempCameraUri()
+
+    /** Comprueba si el permiso de cámara está concedido. */
+    fun hasCameraPermission(): Boolean = cameraManager.hasCameraPermission()
 
     fun submit() {
         val state = _uiState.value

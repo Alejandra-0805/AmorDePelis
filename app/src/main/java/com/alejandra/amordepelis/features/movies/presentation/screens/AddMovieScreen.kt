@@ -1,24 +1,10 @@
 package com.alejandra.amordepelis.features.movies.presentation.screens
 
+import android.Manifest
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.TextButton
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.platform.LocalContext
-import androidx.core.content.FileProvider
-import java.io.File
-import android.Manifest
-import android.content.pm.PackageManager
-import androidx.core.content.ContextCompat
-import androidx.compose.runtime.rememberCoroutineScope
-import kotlinx.coroutines.launch
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -32,7 +18,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AddPhotoAlternate
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.StarOutline
 import androidx.compose.material3.Button
@@ -53,19 +38,22 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
+import androidx.compose.foundation.clickable
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil.compose.AsyncImage
+import com.alejandra.amordepelis.core.hardware.ui.PhotoPreviewBox
+import com.alejandra.amordepelis.core.hardware.ui.PhotoSelectionDialog
 import com.alejandra.amordepelis.features.movies.presentation.components.MoviesTopHeader
 import com.alejandra.amordepelis.features.movies.presentation.viewmodels.MoviesViewModel
+import kotlinx.coroutines.launch
 
 @Composable
 fun AddMovieScreen(
@@ -74,27 +62,23 @@ fun AddMovieScreen(
 ) {
     val uiState by viewModel.addMovieUiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
-    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+
     var showPhotoDialog by remember { mutableStateOf(false) }
     var tempCameraUri by remember { mutableStateOf<android.net.Uri?>(null) }
-    // imageUri se mantiene como estado de UI local; se pasa al ViewModel al guardar.
     var imageUriString by remember { mutableStateOf<String?>(null) }
 
-    val scope = rememberCoroutineScope()
+    // ── Launchers ──────────────────────────────────────────────────────────────
 
     val photoPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
-        onResult = { uri ->
-            uri?.let { imageUriString = it.toString() }
-        }
+        onResult = { uri -> uri?.let { imageUriString = it.toString() } }
     )
 
     val takePictureLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicture(),
         onResult = { success ->
-            if (success) {
-                tempCameraUri?.let { imageUriString = it.toString() }
-            }
+            if (success) tempCameraUri?.let { imageUriString = it.toString() }
         }
     )
 
@@ -102,65 +86,46 @@ fun AddMovieScreen(
         contract = ActivityResultContracts.RequestPermission()
     ) { isGranted ->
         if (isGranted) {
-            val photoFile = File(context.cacheDir, "camera_${System.currentTimeMillis()}.jpg")
-            val uri = FileProvider.getUriForFile(
-                context,
-                "${context.packageName}.fileprovider",
-                photoFile
-            )
-            tempCameraUri = uri
-            takePictureLauncher.launch(uri)
+            viewModel.createCameraUri()?.let { uri ->
+                tempCameraUri = uri
+                takePictureLauncher.launch(uri)
+            }
         } else {
             scope.launch {
-                snackbarHostState.showSnackbar("Permiso de cámara denegado", duration = SnackbarDuration.Short)
+                snackbarHostState.showSnackbar(
+                    "Permiso de cámara denegado",
+                    duration = SnackbarDuration.Short
+                )
             }
         }
     }
 
-    if (showPhotoDialog) {
-        AlertDialog(
-            onDismissRequest = { showPhotoDialog = false },
-            title = { Text("Seleccionar póster") },
-            text = { Text("¿Desde dónde quieres obtener la imagen?") },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        showPhotoDialog = false
-                        
-                        val hasPermission = ContextCompat.checkSelfPermission(
-                            context,
-                            Manifest.permission.CAMERA
-                        ) == PackageManager.PERMISSION_GRANTED
-                        
-                        if (hasPermission) {
-                            val photoFile = File(context.cacheDir, "camera_${System.currentTimeMillis()}.jpg")
-                            val uri = FileProvider.getUriForFile(
-                                context,
-                                "${context.packageName}.fileprovider",
-                                photoFile
-                            )
-                            tempCameraUri = uri
-                            takePictureLauncher.launch(uri)
-                        } else {
-                            cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
-                        }
-                    }
-                ) {
-                    Text("Cámara")
+    // ── Diálogo de selección de foto (composable reutilizable) ─────────────────
+
+    PhotoSelectionDialog(
+        isVisible = showPhotoDialog,
+        title = "Seleccionar póster",
+        onDismiss = { showPhotoDialog = false },
+        onCameraClick = {
+            showPhotoDialog = false
+            if (viewModel.hasCameraPermission()) {
+                viewModel.createCameraUri()?.let { uri ->
+                    tempCameraUri = uri
+                    takePictureLauncher.launch(uri)
                 }
-            },
-            dismissButton = {
-                TextButton(
-                    onClick = {
-                        showPhotoDialog = false
-                        photoPickerLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
-                    }
-                ) {
-                    Text("Galería")
-                }
+            } else {
+                cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
             }
-        )
-    }
+        },
+        onGalleryClick = {
+            showPhotoDialog = false
+            photoPickerLauncher.launch(
+                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+            )
+        }
+    )
+
+    // ── Efectos ───────────────────────────────────────────────────────────────
 
     LaunchedEffect(uiState.isSaved) {
         if (uiState.isSaved) {
@@ -175,6 +140,8 @@ fun AddMovieScreen(
             viewModel.clearAddMovieError()
         }
     }
+
+    // ── UI ────────────────────────────────────────────────────────────────────
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -217,41 +184,13 @@ fun AddMovieScreen(
 
                     Text(text = "Póster:", style = MaterialTheme.typography.labelLarge)
                     Spacer(modifier = Modifier.height(8.dp))
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(180.dp)
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(MaterialTheme.colorScheme.surfaceVariant)
-                            .clickable {
-                                showPhotoDialog = true
-                            },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        if (imageUriString != null) {
-                            AsyncImage(
-                                model = imageUriString,
-                                contentDescription = "Póster seleccionado",
-                                modifier = Modifier.fillMaxSize(),
-                                contentScale = ContentScale.Crop
-                            )
-                        } else {
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Icon(
-                                    imageVector = Icons.Default.AddPhotoAlternate,
-                                    contentDescription = "Subir foto",
-                                    modifier = Modifier.size(48.dp),
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Text(
-                                    text = "Toca para subir una foto",
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    style = MaterialTheme.typography.bodyMedium
-                                )
-                            }
-                        }
-                    }
+
+                    // ── Composable reutilizable de core/hardware/ui ──────────
+                    PhotoPreviewBox(
+                        imageUri = imageUriString,
+                        onTap = { showPhotoDialog = true },
+                        placeholder = "Toca para subir una foto"
+                    )
 
                     Spacer(modifier = Modifier.height(20.dp))
 
@@ -331,13 +270,16 @@ fun AddMovieScreen(
                             .fillMaxWidth()
                             .height(50.dp),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.primary, // Typical blueish color if theme is standard
+                            containerColor = MaterialTheme.colorScheme.primary,
                             contentColor = MaterialTheme.colorScheme.onPrimary
                         ),
-                        shape = RoundedCornerShape(12.dp) // pill shape
+                        shape = RoundedCornerShape(12.dp)
                     ) {
                         if (uiState.isLoading) {
-                            CircularProgressIndicator(color = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(24.dp))
+                            CircularProgressIndicator(
+                                color = MaterialTheme.colorScheme.onPrimary,
+                                modifier = Modifier.size(24.dp)
+                            )
                         } else {
                             Text("Agregar pelicula", fontWeight = FontWeight.SemiBold)
                         }
