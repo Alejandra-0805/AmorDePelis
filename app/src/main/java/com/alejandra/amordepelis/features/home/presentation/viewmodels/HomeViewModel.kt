@@ -43,7 +43,6 @@ class HomeViewModel @Inject constructor(
     val currentAnnouncementIndex: StateFlow<Int> = _currentAnnouncementIndex.asStateFlow()
 
     init {
-        // Observar estado de conectividad
         viewModelScope.launch {
             connectivityManager.isConnected.collect { isConnected ->
                 _uiState.update { it.copy(isConnected = isConnected) }
@@ -53,13 +52,13 @@ class HomeViewModel @Inject constructor(
                 }
             }
         }
-        
+
         viewModelScope.launch {
             sessionManager.currentRole.collect { role ->
                 _uiState.update { it.copy(showAddFirstMovieButton = role != UserRole.PAREJA) }
             }
         }
-        
+
         loadHome()
     }
 
